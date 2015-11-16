@@ -1,0 +1,48 @@
+999999999999999999999999
+
+
+
+一、安装Git
+
+1.安装git，点击Git Bash进入命令行窗口页面 
+2.配置：
+$ git config --global user.name "Your Name"
+$ git config --global user.email "email@example.com"
+注意git config命令的--global参数，用了这个参数，表示你这台机器上所有的Git仓库都会使用这个配置，当然也可以对某个仓库指定不同的用户名和Email地址。
+
+二、创建版本库
+1.创建一个空目录(mkdir <文件夹名>)，可以通过pwd查看当前目录(注意：目录名最好不要有中文)
+2.通过git init 把目录变成Git可以管理的仓库，执行该命令之后可以通过ls -ah查看到该目录下的隐藏文件.git
+3.使用命令git add <文件名> 把该文件提交到stage(暂存区)
+3.使用命令git commit <-m "XXX"> 把暂存区里的所有文件提交到Git版本库
+
+三、掌握两命令
+1.git status 查看工作区的状态
+2.git diff   查看文件修改有哪些
+
+四、版本回退
+1.通过命令git log可以查看所有已经commit的日志，若信息太多可以在其后面加--pretty=oneline
+2.在Git中HEAD表示当前版本
+  ---上一个版本HEAD^
+  ---上上一版本HEAD^^
+  ---前100个版本HEAD~100
+3.返回到上一个版本的命令git reset --hard HEAD^
+4.回到未来的某版本git reset --hard 3628164  （后面的是一个commit_id）
+
+五、工作区和暂存区
+1.了解工作区和暂存区的模式
+
+六、管理修改
+1.命令git diff HEAD -- <文件名>  可以查看工作区和版本库里面最新版本的区别：
+
+七、撤销修改
+1.git checkout -- <文件名>，有以下两种情况： 
+  一种是readme.txt自修改后还没有被放到暂存区，现在，撤销修改就回到和版本库一模一样的状态；
+
+  一种是readme.txt已经添加到暂存区后，又作了修改，现在，撤销修改就回到添加到暂存区后的状态。
+2.命令git reset HEAD -- <文件名> 可以把暂存区的修改撤销掉（unstage），重新放回工作区：
+
+八、删除文件
+1.直接删除工作区的文件，可以用rm <文件名>
+2.需要删除git版本库中的文件，可用git rm <文件名> ,然后再执行git commit
+3.注意：如果只是把工作区的文件删错了，而在git版本库里面还存在，可以直接用git checkout跟其文件名可找回；
