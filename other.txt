@@ -46,7 +46,8 @@ $ git config --global user.email "email@example.com"
 
 九、远程仓库
 1.由于需要和远程仓库是通过SSH来链接的，所以需要在本地使用$ ssh-keygen -t rsa -C "youremail@example.com"来生成一个签名
-  如果一切顺利的话，可以在用户主目录里找到.ssh目录，里面有id_rsa和id_rsa.pub两个文件，这两个就是SSH Key的秘钥对，id_rsa是私钥，不能泄露出去，id_rsa.pub是公钥，可以放心地告诉任何人。
+  如果一切顺利的话，可以在用户主目录里找到.ssh目录，里面有id_rsa和id_rsa.pub两个文件，这两个就是SSH Key的秘钥对，id_rsa是私钥，
+  不能泄露出去，id_rsa.pub是公钥，可以放心地告诉任何人。
 2.第2步：登陆GitHub，打开“Account settings”，“SSH Keys”页面
   然后，点“Add SSH Key”，填上任意Title，在Key文本框里粘贴id_rsa.pub文件的内容：
   
@@ -54,8 +55,10 @@ $ git config --global user.email "email@example.com"
 1.首先，登陆GitHub，然后，在右上角找到“Create a new repo”按钮，创建一个新的仓库
 2.在Repository name填入learngit，其他保持默认设置，点击“Create repository”按钮，就成功地创建了一个新的Git仓库
 3.通过$ git remote add origin git@server-name:path/repo-name.git将本地仓库与github关联
+  (如：$ git remote add origin git@github.com:michaelliao/learngit.git)
 4.每一次推送时使用$ git push -u origin master把本地库的所有内容推送至远程
-  (注意：由于远程库是空的，我们第一次推送master分支时，加上了-u参数，Git不但会把本地的master分支内容推送的远程新的master分支，还会把本地的master分支和远程的master分支关联起来，在以后的推送或者拉取时就可以简化命令。)
+  (注意：由于远程库是空的，我们第一次推送master分支时，加上了-u参数，Git不但会把本地的master分支内容推送的远程新的master分支，
+   还会把本地的master分支和远程的master分支关联起来，在以后的推送或者拉取时就可以简化命令。)
  
 十一、从远程库克隆
 1.首先创建一个远程库，然后通过git clone git@github.com:michaelliao/gitskills.git 克隆该项目
@@ -109,8 +112,12 @@ dev上的内容还不能提交，所以需要通过git stash先储藏，储藏后通过git status可以查看
 (2)dev分支是开发分支，团队所有成员都需要在上面工作，所以也需要与远程同步；
 (3)bug分支只用于在本地修复bug，就没必要推到远程了，除非老板要看看你每周到底修复了几个bug；
 (4)feature分支是否推到远程，取决于你是否和你的小伙伴合作在上面开发。
-4.当其它人通过git clone命令克隆项目后，默认能看到的是master分支(可通过git branch查看)，如果要在dev分支上开发，就必须创建远程origin的dev分支到本地，于是他用这个命令创建本地dev分支：$ git checkout -b dev origin/dev
-，当在dev上开必后push到远程。当自己也在该分支上修改后要提交到远程时，只需要$ git push origin dev就行了。若在push时出现冲突就先pull下来解决冲突再推送，如果当发现pull失败是因为没有指定本地dev分支与远程origin/dev分支的链接的话(通过提示信息no tracking information表明没链接上)，可以通过git branch --set-upstream branch-name origin/branch-name来设置dev和origin/dev的链接。最后链接成功后再pull若有冲突再解决再push就Ok
+4.当其它人通过git clone命令克隆项目后，默认能看到的是master分支(可通过git branch查看)，如果要在dev分支上开发，
+  就必须创建远程origin的dev分支到本地，于是他用这个命令创建本地dev分支：$ git checkout -b dev origin/dev，
+  当在dev上开必后push到远程。当自己也在该分支上修改后要提交到远程时，只需要$ git push origin dev就行了。
+  若在push时出现冲突就先pull下来解决冲突再推送，如果当发现pull失败是因为没有指定本地dev分支与远程origin/dev分支的链接的话(通过
+  提示信息no tracking information表明没链接上)，可以通过git branch --set-upstream branch-name origin/branch-name来设置dev和origin/dev的链接。
+  最后链接成功后再pull若有冲突再解决再push就Ok
 
 小结：
 
@@ -127,13 +134,16 @@ dev上的内容还不能提交，所以需要通过git stash先储藏，储藏后通过git status可以查看
 (6)从远程抓取分支，使用git pull，如果有冲突，要先处理冲突。	  
 
 十八、标签管理
-1.发布一个版本时，我们通常先在版本库中打一个标签，这样，就唯一确定了打标签时刻的版本。将来无论什么时候，取某个标签的版本，就是把那个打标签的时刻的历史版本取出来。所以，标签也是版本库的一个快照。
-2.Git的标签虽然是版本库的快照，但其实它就是指向某个commit的指针（跟分支很像对不对？但是分支可以移动，标签不能移动），所以，创建和删除标签都是瞬间完成的。
+1.发布一个版本时，我们通常先在版本库中打一个标签，这样，就唯一确定了打标签时刻的版本。将来无论什么时候，取某个标签的版本，
+  就是把那个打标签的时刻的历史版本取出来。所以，标签也是版本库的一个快照。
+2.Git的标签虽然是版本库的快照，但其实它就是指向某个commit的指针（跟分支很像对不对？但是分支可以移动，标签不能移动），所以，
+  创建和删除标签都是瞬间完成的。
 
 十九、创建标签
 1.决定要在哪个分支上打包，比如在master上打标签，可以直接$ git tag v1.0 表示在master分支的最新的一次提交上打标签为v1.0
 2.命令git tag查看所有标签
-3.默认标签是打在最新的commit上，如果想要打在之前某次的提交上，可以通过$ git tag v0.9 6224937 即可，后面的数字表示该次提交的密印，当签名完成后可以通过git tag查看到刚才的标签
+3.默认标签是打在最新的commit上，如果想要打在之前某次的提交上，可以通过$ git tag v0.9 6224937 即可，后面的数字表示该次提交的密印，
+  当签名完成后可以通过git tag查看到刚才的标签
 注意：当通过git tag时列出所有的标签不是按时间顺序列出，而是按字母排序的
 4.通过git show <tagname>查看标签信息   如：$ git show v0.9
 5.创建带有说明的标签，$ git tag -a v0.1 -m "version 0.1 released" 3628164  (用-a指定标签名，-m指定说明文字)
