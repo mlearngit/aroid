@@ -1,0 +1,146 @@
+
+一、安装Git
+
+1.安装git，点击Git Bash进入命令行窗口页面 
+2.配置：
+$ git config --global user.name "Your Name"
+$ git config --global user.email "email@example.com"
+注意git config命令的--global参数，用了这个参数，表示你这台机器上所有的Git仓库都会使用这个配置，当然也可以对某个仓库指定不同的用户名和Email地址。
+
+二、创建版本库
+1.创建一个空目录(mkdir <文件夹名>)，可以通过pwd查看当前目录(注意：目录名最好不要有中文)
+2.通过git init 把目录变成Git可以管理的仓库，执行该命令之后可以通过ls -ah查看到该目录下的隐藏文件.git
+3.使用命令git add <文件名> 把该文件提交到stage(暂存区)
+3.使用命令git commit <-m "XXX"> 把暂存区里的所有文件提交到Git版本库
+
+三、掌握两命令
+1.git status 查看工作区的状态
+2.git diff   查看文件修改有哪些
+
+四、版本回退
+1.通过命令git log可以查看所有已经commit的日志，若信息太多可以在其后面加--pretty=oneline
+2.在Git中HEAD表示当前版本
+  ---上一个版本HEAD^
+  ---上上一版本HEAD^^
+  ---前100个版本HEAD~100
+3.返回到上一个版本的命令git reset --hard HEAD^
+4.回到未来的某版本git reset --hard 3628164  （后面的是一个commit_id）
+
+五、工作区和暂存区
+1.了解工作区和暂存区的模式
+
+六、管理修改
+1.命令git diff HEAD -- <文件名>  可以查看工作区和版本库里面最新版本的区别：
+
+七、撤销修改
+1.git checkout -- <文件名>，有以下两种情况： 
+  一种是readme.txt自修改后还没有被放到暂存区，现在，撤销修改就回到和版本库一模一样的状态；
+
+  一种是readme.txt已经添加到暂存区后，又作了修改，现在，撤销修改就回到添加到暂存区后的状态。
+2.命令git reset HEAD -- <文件名> 可以把暂存区的修改撤销掉（unstage），重新放回工作区：
+
+八、删除文件
+1.直接删除工作区的文件，可以用rm <文件名>
+2.需要删除git版本库中的文件，可用git rm <文件名> ,然后再执行git commit
+3.注意：如果只是把工作区的文件删错了，而在git版本库里面还存在，可以直接用git checkout跟其文件名可找回；
+
+九、远程仓库
+1.由于需要和远程仓库是通过SSH来链接的，所以需要在本地使用$ ssh-keygen -t rsa -C "youremail@example.com"来生成一个签名
+  如果一切顺利的话，可以在用户主目录里找到.ssh目录，里面有id_rsa和id_rsa.pub两个文件，这两个就是SSH Key的秘钥对，id_rsa是私钥，不能泄露出去，id_rsa.pub是公钥，可以放心地告诉任何人。
+2.第2步：登陆GitHub，打开“Account settings”，“SSH Keys”页面
+  然后，点“Add SSH Key”，填上任意Title，在Key文本框里粘贴id_rsa.pub文件的内容：
+  
+十、添加远程库
+1.首先，登陆GitHub，然后，在右上角找到“Create a new repo”按钮，创建一个新的仓库
+2.在Repository name填入learngit，其他保持默认设置，点击“Create repository”按钮，就成功地创建了一个新的Git仓库
+3.通过$ git remote add origin git@server-name:path/repo-name.git将本地仓库与github关联
+4.每一次推送时使用$ git push -u origin master把本地库的所有内容推送至远程
+  (注意：由于远程库是空的，我们第一次推送master分支时，加上了-u参数，Git不但会把本地的master分支内容推送的远程新的master分支，还会把本地的master分支和远程的master分支关联起来，在以后的推送或者拉取时就可以简化命令。)
+ 
+十一、从远程库克隆
+1.首先创建一个远程库，然后通过git clone git@github.com:michaelliao/gitskills.git 克隆该项目
+2.Git支持多种协议，包括https，但通过ssh支持的原生git协议速度最快。
+
+十二、创建与合并分支
+1.在版本回退可以看见有一条默认的时间线，该线是一条主分支即master，而HEAD其实是指向master，master指向提交的，所以HEAD指向的就是当前分反
+2.每次在master上提交，该分支就会向前移动一步
+3.当我们创建一个新分支(dev)时，此时该分支是指向master相同的提交，当切换为dev分支时，HEAD就指向dev
+4.当在dev上提交时，dev就往前移动一步，而master指针不变
+5.创建分支的命令$ git branch dev; 切换分支$ git checkout dev，前两命令可以通过$ git checkout -b dev  完成
+6.查看分支$ git branch ,列出所有分支，当前分支前面会有一个*号
+7.切换分支后修改内容并提交到该分支后，如果要把该提交合并到主分支，则需要先切换至主分支$ git checkout master
+8.合并到master上$ git merge dev
+9.删除原来的分支$ git branch -d dev
+
+十三、解决冲突
+1.在dev分支上进行开发，开发完成后提交到该分支上，此时切换至master分支，在主分支上也修改一内容提交，然后把dev分支上的提交合并到master上
+则提示有冲突，此时我们只需要手动解决冲突然后重新提交即可
+
+十四、分支管理策略
+1.通常，合并分支时，如果可能，Git会用Fast forward模式，但这种模式下，删除分支后，会丢掉分支信息。
+2.如果要强制禁用Fast forward模式，Git就会在merge时生成一个新的commit，这样，从分支历史上就可以看出分支信息。
+3.要禁用此上模式，则需要在合并时加上--no-ff
+4.使用$ git merge --no-ff -m "merge with no-ff" dev 合并后，会创建一个新的commit，这里加上-m参数可以给出描述
+5.通过以上方式合并后，我们再通过$ git log --graph --pretty=oneline --abbrev-commit可以查看到分支历史
+总结：合并分支时，加上--no-ff参数就可以用普通模式合并，合并后的历史有分支，能看出来曾经做过合并，而fast forward合并就看不出来曾经做过合并。
+
+十五、Bug分支
+1.如果目前在dev分支上做开发，现在有一bug需要急速解决并合并到master上，这时可以在master上新建一分支(名为bug-101)，由于目前
+dev上的内容还不能提交，所以需要通过git stash先储藏，储藏后通过git status可以查看到工作区是干净的
+2.如果是在master上修复就在该分支上创建临时bug-101分支，修复完成后可以合并到master上并删除该bug分支
+3.再回到dev上继续开发，可以通过$ git stash list查看工作现场
+4.这里有两人种方法可以恢复：
+一是用git stash apply恢复，但是恢复后，stash内容并不删除，你需要用git stash drop来删除；
+二是用git stash pop，恢复的同时把stash内容也删了：
+5.当用第二种方式恢复后，再且git stash list时就查不到储藏的工作现场了
+6.你可以多次stash，恢复的时候，先用git stash list查看，然后恢复指定的stash，用命令：$ git stash apply stash@{0}
+
+十六、Feature分支
+掌握两点：
+1.开发一个新feature，最好新建一个分支。
+2.如果要丢弃一个没有被合并过的分支，可以通过git branch -D <name>强行删除。(注意：这里面用的是大D)
+
+十七、多人协作
+1.当你从远程仓库克隆时，实际上Git自动把本地的master分支和远程的master分支对应起来了，并且，远程仓库的默认名称是origin。
+2.查看远程库的信息用$ git remote，可以查到当前的仓库名(或者可以用git remote -v查看详细信息)
+3.推送分支$ git push origin <分支名>  比如$ git push origin master或$ git push origin dev
+注意如下：
+(1)master分支是主分支，因此要时刻与远程同步；
+(2)dev分支是开发分支，团队所有成员都需要在上面工作，所以也需要与远程同步；
+(3)bug分支只用于在本地修复bug，就没必要推到远程了，除非老板要看看你每周到底修复了几个bug；
+(4)feature分支是否推到远程，取决于你是否和你的小伙伴合作在上面开发。
+4.当其它人通过git clone命令克隆项目后，默认能看到的是master分支(可通过git branch查看)，如果要在dev分支上开发，就必须创建远程origin的dev分支到本地，于是他用这个命令创建本地dev分支：$ git checkout -b dev origin/dev
+，当在dev上开必后push到远程。当自己也在该分支上修改后要提交到远程时，只需要$ git push origin dev就行了。若在push时出现冲突就先pull下来解决冲突再推送，如果当发现pull失败是因为没有指定本地dev分支与远程origin/dev分支的链接的话(通过提示信息no tracking information表明没链接上)，可以通过git branch --set-upstream branch-name origin/branch-name来设置dev和origin/dev的链接。最后链接成功后再pull若有冲突再解决再push就Ok
+
+小结：
+
+(1)查看远程库信息，使用git remote -v；
+
+(2)本地新建的分支如果不推送到远程，对其他人就是不可见的；
+
+(3)从本地推送分支，使用git push origin branch-name，如果推送失败，先用git pull抓取远程的新提交；
+
+(4)在本地创建和远程分支对应的分支，使用git checkout -b branch-name origin/branch-name，本地和远程分支的名称最好一致；
+
+(5)建立本地分支和远程分支的关联，使用git branch --set-upstream branch-name origin/branch-name；
+
+(6)从远程抓取分支，使用git pull，如果有冲突，要先处理冲突。	  
+
+十八、标签管理
+1.发布一个版本时，我们通常先在版本库中打一个标签，这样，就唯一确定了打标签时刻的版本。将来无论什么时候，取某个标签的版本，就是把那个打标签的时刻的历史版本取出来。所以，标签也是版本库的一个快照。
+2.Git的标签虽然是版本库的快照，但其实它就是指向某个commit的指针（跟分支很像对不对？但是分支可以移动，标签不能移动），所以，创建和删除标签都是瞬间完成的。
+
+十九、创建标签
+1.决定要在哪个分支上打包，比如在master上打标签，可以直接$ git tag v1.0 表示在master分支的最新的一次提交上打标签为v1.0
+2.命令git tag查看所有标签
+3.默认标签是打在最新的commit上，如果想要打在之前某次的提交上，可以通过$ git tag v0.9 6224937 即可，后面的数字表示该次提交的密印，当签名完成后可以通过git tag查看到刚才的标签
+注意：当通过git tag时列出所有的标签不是按时间顺序列出，而是按字母排序的
+4.通过git show <tagname>查看标签信息   如：$ git show v0.9
+5.创建带有说明的标签，$ git tag -a v0.1 -m "version 0.1 released" 3628164  (用-a指定标签名，-m指定说明文字)
+
+二十、操作标签
+1.删除标签：$ git tag -d <tagname>
+2.推送某个标签到远程：git push origin <tagname>  或推送全部尚未推送到远程的本地标签$ git push origin --tags
+3.如果标签已经推送到远程若需要删除，则需要分两步，一是先删除本地的该标签，二是再删除远程的该标签，即$ git tag -d v0.9和$ git push origin :refs/tags/<tagname>
+
+Git的官方网站：http://git-scm.com
