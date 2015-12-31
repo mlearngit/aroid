@@ -154,3 +154,6 @@ dev上的内容还不能提交，所以需要通过git stash先储藏，储藏后通过git status可以查看
 3.如果标签已经推送到远程若需要删除，则需要分两步，一是先删除本地的该标签，二是再删除远程的该标签，即$ git tag -d v0.9和$ git push origin :refs/tags/<tagname>
 
 Git的官方网站：http://git-scm.com
+
+
+VPN Url:https://www.jsqgreen.com/
