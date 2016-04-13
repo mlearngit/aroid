@@ -45,17 +45,261 @@ public class InnerDemo{
 
 
 
-2.内部类定义原则：
-当内部类在成员位置上，就可以被成员修饰符所修饰。
+2.静态内部类
+
+访问格式：
+1.当内部类定义在外部类的成员位置上，而且非私有，可以在外部其它类中(如main方法)。可以直接建立内部类对象
+格式  
+    外部类名.内部类名    变量名 = 外部类对象.内部类对象;
+	Outer.Inner in out=new Outer.new Inner();
+	
+	
+2.当内部类在成员位置上，就可以被成员修饰符所修饰。
   比如：private ：将内部类在外部类中进行封装。
         static ：内部类就具备static特性。
-		当内部被static修饰后，只能直接访问外部类听static成员，出现了访问局限。
+		当内部类被static修饰后，只能直接访问外部类中的static成员，出现了访问局限。
 		
 		在外部其它类中，如何直接访问static内部类的非静态成员呢？
 		new outer.Inner().function();
 		
 		在外部其它类中，如何直接访问static内部类的静态成员呢？
-		uter.Inner.function();
+		Outer.Inner.function();
 		
 	注意：当内部类中定义了静态成员，该内部类必须是static的。
-	      当外部类别的静态方法访问内部类时，内部类也必须是static的。
+	      当外部类中的静态方法访问内部类时，内部类也必须是static的。
+		  
+		  
+class Outer{
+  private int x=3;
+  
+  static class Inner{
+      
+      public void function(){
+		
+	    System.out.println("Inner: "+x);  //这句话中，打印结果是3,其实的调用方式为Outer.this.x
+	  }
+  }
+  
+}
+
+public class InnerDemo{
+   public static void main(String[] args){
+       Outer.Inner in out=new Outer.new Inner();
+	   out.function();
+	 
+	 //直接访问内部内中的成员，下面的写法基本用不着
+	// Outer.Inner in=new Outer().new Inner();
+	  //in.function();
+   }
+}		  
+		  
+		  
+		  
+3.内部类定义原则：		  
+当描述事物时，事物内部还有事物，该事物内内部类来描述。
+因为内部事务在使用外部事物内容
+当一个类需要直接访问另一个类的成员时就可以把这个类写到里面去，然后将该类封装起来，并提供其它外部内的访问方法
+class Body{
+
+   private class XingZang{
+	}
+	
+   public void show(){
+       new XingZang().
+   }
+
+}
+
+
+
+4.匿名内部类
+
+透过以下两个demo总结：
+内部类定义在局部时，
+1.不可以被成员修饰符所修饰，即不可以在function加static ，如果加了对应的类也会静态，这不符合语法
+2.可以直接访问外部类中的成员，因为还持有外部类中的引用，
+   但是不可以访问它所在的局部中的变量，只能访问被final修饰的局部变量
+
+demo1:
+class Outer{
+  int x=3;
+  
+  void method(){
+      //new Inner().function();    此实例化只能放到Inner内部类的下方，因为此类还未被加载到就实例名时会提示找不着类
+     class Inner{
+	    void function(){
+		   System.out.println(Outer.this.x);
+		}
+	      
+	}
+	
+	    new Inner().function();	
+  }
+}
+
+
+class InnerClassDemo3{
+   public static void main(String[] args){
+       new Outer().method();
+   }
+}
+
+
+
+demo2:
+class Outer{
+  int x=3;
+  
+  void method(){
+  
+      final int y=4;
+	  
+     class Inner{
+	   
+	    void function(){
+		   System.out.println(y);
+		}
+	      
+	}
+	
+	    new Inner().function();	
+  }
+}
+
+
+class InnerClassDemo3{
+   public static void main(String[] args){
+       new Outer().method();
+   }
+}
+
+
+
+
+继续匿名内部类
+
+1.匿名内部类其实就是内部名的简写格式。
+2.定义匿名内部类的前提：
+     内部类必须是继承一个类或者实现接口
+3.匿名内部类的格式：new 父类或者接口(){定义子类内容}
+4.其实匿名内部类就是一个匿名子类对象，而且这个对象有点胖，可以理解为带内容的对象。
+5.匿名内部类中定义的方法最好不要超过3个。
+abstract class 	AbsDemo{
+  abstract void show();
+}
+
+
+class Outer{
+  int x=3;
+  
+ /** 
+  class Inner extends AbsDemo{
+	   
+	    public void show(){
+		   System.out.println("show="+x);
+		}
+	}
+  */	
+  
+  
+	public void function(){
+	   //new Inner().show();
+	   
+	   
+	   new AbsDemo(){
+	   
+	     void show("x"=x){
+		   
+		 }
+	   }.show();
+	   
+	}
+
+}
+
+
+class InnerClassDemo3{
+   public static void main(String[] args){
+       new Outer().function();
+   }
+}
+
+
+
+
+以下是一个练习：
+一个非匿名的形式
+interface Inter{
+   void method();
+}
+
+class Test{
+ 
+   static class Inner implements Inter{
+      public void method(){
+	    System.out.println("method run");
+	  }
+   }
+   
+   static Inter function(){
+       return new Inner();
+   }
+}
+
+
+class InnerClassTest{
+  public static void main(String[] args){
+    Test.function().method();
+  }
+}
+
+
+
+一个匿名的形式:
+
+interface Inter{
+   void method();
+}
+
+class Test{
+ 
+ 
+   static Inter function(){
+	   
+       return new Inter(){
+		   public void method(){
+		     System.out.println("method run..");
+	  }
+	   };
+   }
+}
+
+
+class InnerClassTest{
+  public static void main(String[] args){
+     //Test.function(): Test类中有一个静态的方法function
+	 //.method();function这个方法运算后的结果是一个对象。而且是一个Inter类型对象。
+	 //因为只有一个Inter类型的对象，才可以调用method方法。
+  
+    Test.function().method();
+	
+	// 以上的写法可以改成如下
+	   Inter in=Test.function();
+	   in.method();
+  }
+}
+
+另个还有一种情况，如：
+
+在show方法里面需要传入一个匿名对象
+show(new Inter(){
+  public void method(){
+     System.out.println("method show run");
+  }
+});
+
+
+public static void show(Inter in){
+     in.method();
+}
+
