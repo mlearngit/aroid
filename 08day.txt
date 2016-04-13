@@ -1,0 +1,257 @@
+1.多态-转型：
+
+class Animal{
+public void eat(){
+	  System.out.println("animal...");
+	}
+}
+
+class Cat extends Animal{
+
+    public void eat(){
+	  System.out.println("catchMouse");
+	}
+	
+	public void sleep(){
+		System.out.println("sleep...");
+	}
+}
+
+public class DuoTai{
+	
+	public static void main(String []args){
+		 
+		 Animal a=new Cat();
+		 Cat c=(Cat)a;
+		 c.sleep();
+	}
+	
+}
+
+Animal a=new Cat();
+//如果想要调用猫特有方法时，如何操作？
+//强制将父类的引用转成子类类型，向下转型。
+Cat c=(Cat)a;
+c.catchMouse();
+//千万不要出现这样的操作，就是将父类对象转成子类类型。
+//我们能转换的是父类引用指向了自己的子类对象时，该引用可以被提升，也可以被强制转换。
+//多态自始至终都是子类对象在做变化。
+
+
+
+
+2.多态-示例：
+
+abstract class Student{
+	public abstract void study();
+	public void sleep(){
+		System.out.println("tang sleep");
+	}
+}
+
+class DoStudent{
+	public void doSome(Student s){
+		s.study();
+		s.sleep();
+	}
+}
+
+class BaseStudent extends Student{
+	public void study(){
+		System.out.println("base study");
+	}
+	
+	public void sleep(){
+		System.out.println("zuozhao sleep");
+
+	}
+}
+
+class AdvStudent extends Student{
+	public void study(){
+		System.out.println("adv study");
+	}
+
+}
+
+public class DuoTaiDemo{
+	public static void main(String []args){
+		DoStudent ds=new DoStudent();
+		ds.doSome(new BaseStudent());
+		ds.doSome(new AdvStudent());
+		
+	}
+}
+
+1.多态的体现
+  父类引用指向了自己的子类对象。
+  父类的引用也可以接收自己的子类对象。
+2.多态的前提
+  必须是类与类之间有关系，要么继承，要么实现。
+  通常还有一个前提：存在覆盖。
+3.多态的好处
+  多态的出现大大的提高程序的扩展性。
+4.多态的弊端
+  虽然提高了扩展性，但是只能使用父类的引用访问父类中的成员。
+  
+  
+  
+3.多态中成员的特点；
+class Fu{
+   void method1(){
+      System.out.println("fu method1");
+   }
+   
+   void method2(){
+      System.out.println("fu method2");
+   }
+}
+
+class Zi extends Fu{
+   void method1(){
+      System.out.println("zi method1");
+   }
+   
+   void method3(){
+      System.out.println("zi method3");
+   }
+}
+
+public class Demo{
+	public static void main(String []args){
+		Fu f=new Zi();
+		f.method1();
+		f.method2();
+		f.method3(); //代码到此行会编译失败，因为Fu类中没有method3()方法
+		
+	}
+}
+
+在编译时期：参阅引用型变量所属的类中是否有调用的方法。如果有，编译通过，如果没有编译失败。
+在运行时期：参阅对象所属的类中是否有调用的方法。
+简单总结就是：成员函数在多态调用时，编译看左边，运行看右边。
+
+在多态中，成员变量的特点：
+无论编译和运行，都参考左边（引用型变量所属的类）。
+
+在多态中，静态成员函数的特点;
+无论编译和运行，都参考左边。
+
+
+
+
+interface PIC{
+	public void open();
+	public void close();
+}
+
+
+class MainBoard{
+	public void run(){
+		System.out.println("board run");
+	}
+	
+	public void usePic(PIC c){
+		if(c!=null){
+			c.open();
+		    c.close();
+		}
+		
+	}
+}
+
+
+class NetWork implements PIC{
+	
+	public void open(){
+		System.out.println("network open");
+	}
+	
+	public void close(){
+		System.out.println("network close");
+	}
+	
+}
+public class DuoTaiDemo5{
+	public static void main(String[]args){
+		MainBoard mb=new MainBoard();
+		mb.run();
+		mb.usePic(null);
+		mb.usePic(new NetWork());
+	}
+}
+
+
+
+4.Object类-equals()
+Object:是所有对象的直接或间接父类，传说中的上帝。
+该类中定义的肯定是所有对象都具备的功能。
+
+Object类中已经提供提花了对对象是否相同的比较方法。
+
+如果自定义类中也有比较相同的功能，没有必要重新定义。
+只要沿袭父类中的功能，建立自己特有比较内容即可。这就是覆盖
+class Demo{
+	private int num;
+	public Demo(int num){
+		this.num=num;
+	}
+	
+	public boolean equals(Object obj){   //Object obj=new Demo();
+		Demo d=(Demo)obj;
+		return this.num==d.num;
+		//this.num=obj.num;
+	}
+	
+	
+	/**
+	
+     public boolean compare(Demo d){
+	   return this.num=d.num;
+	 }
+	 
+   */
+	
+}
+
+public class ObjectDemo{
+	public static void main(String[]args){
+		Demo d1=new Demo(3);
+		Demo d2=new Demo(3);
+		System.out.println(d1.equals(d2));
+	}
+}
+
+
+
+
+5.Object类-toString()
+
+class Demo{
+	private int num;
+	public Demo(int num){
+		this.num=num;
+	}
+	
+	public boolean equals(Object obj){
+		Demo d=(Demo)obj;
+		return this.num==d.num;
+		//this.num=obj.num;
+	}
+}
+
+public class ObjectDemo{
+	public static void main(String[]args){
+		Demo d1=new Demo(3);
+		
+		Class c=d1.getClass();
+		
+		
+		System.out.println(d1+"\t"+d1.toString());    //打印结果：Demo@686baa51 该组成部分[Demo+@+686baa51]这个是哈希码，也就是说内存地址
+		
+		System.out.println(d1.hashCode());
+		System.out.println(Integer.toHexString(d1.hashCode()));
+		System.out.println(c.getName()+"@"+Integer.toHexString(d1.hashCode()));
+	}
+}
+
