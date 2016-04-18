@@ -1,0 +1,178 @@
+1.finally
+
+class Demo{
+  int div(int a,int b) throws FushuException
+  {
+      if(b<0){
+	    throw new FushuException("fu shu la");
+	  }
+      return a/b;
+  }
+}
+
+class FushuException extends Exception{
+    FushuException(String msg){
+	   super(msg);
+	}
+}
+
+
+public class ExceptionDemo5{
+  public static void main(String[] args){
+    Demo d=new Demo();
+	try{
+		int x=d.div(6,-2);
+	    System.out.println("x="+x);
+	}catch(FushuException e){
+	   System.out.println(e.toString());
+	   return;
+	}
+	finally{
+		System.out.println("finally");  //finally里面存放的是一定会被执行的代码
+	}
+	
+	System.out.println("over");
+  }
+}
+
+
+
+
+finally 另一个说明例子
+public void method() throws NoException
+{
+   连接数据库;
+   操作数据;   // throw new SQLException()
+   关闭数据库; //该操作无论数据是否操作成功，一定要关闭数据库
+   
+   
+try{
+
+连接数据库;
+操作数据;   // throw new SQLException()
+
+}catch(SQLException e){
+
+   对会数据库进行处理 
+   throw new NoException();  
+   //注意：以上语句为什么没有直接把SQLException直接抛出，而是直接抛出一个更合理的NoException异常信息给调用者（可以参考前一节电脑冒烟的处理）
+}
+finally{
+
+关闭数据库;
+}
+}
+
+
+class NoException extends  Exception{
+}
+
+
+
+
+
+2. 异常-处理语句其它格式
+
+这里工有三种格式：
+第一种
+try{
+
+}catch(){
+
+}
+
+
+第二种
+
+try{
+
+}catch(){
+
+}
+finally{
+
+}
+
+
+第三种
+
+try{
+
+}
+finally{
+
+}
+例子：
+class Demo{
+  pubic void method() throws Exception{
+    try{
+	   thorw new Exception();
+	}
+	finally(){
+	  //关资源
+	}
+  }
+  
+
+
+记住：catch是用于处理异常，如果没有catch就代表异常没有被处理过，如果该异常是检测时异常，那么必须声明。
+第三种格式可以这样理解:在出现异常的时候没有进行catch处理，只是把资源关闭了，至于问题就留给调用者去处理。
+
+
+
+
+3.异常--覆盖时的异常特点
+
+异常在子父类覆盖中的体现：
+1.子类在覆盖父类时，如果父类的方法抛出异常，那么子类覆盖方法只能抛出父类的异常或者该异常的子类。
+2.如果父类方法抛出多个异常，那么子类的覆盖该方法时，只能抛出父类异常的子集。
+3.如果父类或者接口的方法中没有异常抛出，那么子类在覆盖方法时，也不可以抛出异常。
+    如果子类方法发生了异常，就必须要进行try处理。绝对不能抛。
+	
+class AException extends Exception{
+}
+
+class BException extends AException{
+}
+
+class CException extends Exception{
+}
+
+/*
+关系：
+
+Exception
+	|--AException
+		|--BException
+	|--CException
+*/
+
+class Fu{
+  void show() throws AException
+  {
+  }
+}
+
+class Test{
+  void function(Fu f){
+    try{
+	  f.show();
+	}catch(AException e){
+	}
+  }
+}
+
+class Zi extends Fu{
+  void show() throws CException
+  {
+  }
+}
+
+class Demo{
+  public static void main(String[] args){
+    Test t=new Test();
+	t.function(new Fu());
+	t.function(new Zi());  //此行代码会报错，因为Zi类抛出的是CException,在function方法的catch中不被AException识别
+  }
+}
+
