@@ -38,7 +38,7 @@ $ git config --global user.email "email@example.com"
   (前提是该readme.txt文件之前已经被add到stage过，当再在工作区里面修改后，如果想清楚上次修改，则可用此命令)
 
   一种是readme.txt已经添加到暂存区后，又作了修改，现在，撤销修改就回到添加到暂存区后的状态。
-2.命令git reset HEAD -- <文件名> 可以把暂存区的修改撤销掉（unstage），重新放回工作区：
+2.命令git reset HEAD -- <文件名> 可以把暂存区的修改撤销掉（unstage），重新放回工作区。
 
 八、删除文件
 1.直接删除工作区的文件，可以用rm <文件名>
