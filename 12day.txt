@@ -1,0 +1,1217 @@
+1. 线程间通信--示例代码
+
+线程间通讯
+其实就是多个线程在操作同一个资源
+但是操作的动作不同。
+
+class Res{
+  String name;
+  String sex;
+}
+
+class Input implements Runnable{
+  private Res r;
+  Input(Res r){
+	this.r=r;
+  }
+  public void run(){
+	int x=0;
+	while(true){
+
+		if(x==0){
+			r.name="Tom";
+			r.sex="man";
+		}else{
+			r.name="Jane";
+			r.sex="woman";
+		}
+		x=(x+1)%2;
+	}
+  }
+}
+
+
+class Output implements Runnable{
+	private Res r;
+	Output(Res r){
+		this.r=r;
+	}
+  public void run(){
+	while(true){
+		System.out.println(r.name+"...."+r.sex);
+	}
+    
+  }
+}
+
+
+public class InputOutputDemo{
+  public static void main(String[] args){
+	Res r=new Res();
+	
+	Input in=new Input(r);
+	Output out=new Output(r);
+	
+	Thread t1=new Thread(in);
+	Thread t2=new Thread(out);
+	
+	t1.start();
+	t2.start();
+	
+	
+  }
+}
+
+
+运行结果：
+Jane......man
+Tom......woman
+Jane........woman
+Tom......woman
+Tom......woman
+Jane........woman
+
+
+注意：出现以上的情况是因为线程在给某一个name赋值后，还没有给sex赋值就被Output线程执行了
+
+
+
+2. 线程间通信-解决安全问题
+
+class Res{
+  String name;
+  String sex;
+}
+
+class Input implements Runnable{
+  private Res r;
+  //Object obj=new Object();
+  Input(Res r){
+	this.r=r;
+  }
+	  public void run(){
+		int x=0;
+		while(true){
+			synchronized(r){
+					if(x==0){
+						r.name="Tom";
+						r.sex="man";
+					}else{
+						r.name="Jane";
+						r.sex="woman";
+					}
+					x=(x+1)%2;
+			}	
+		}
+	}
+}
+
+
+class Output implements Runnable{
+	private Res r;
+	//Object obj=new Object();
+	Output(Res r){
+		this.r=r;
+	}
+	  public void run(){
+		while(true){
+			synchronized(r){
+				System.out.println(r.name+"...."+r.sex);
+			}	
+		}    
+	}
+}
+
+
+public class InputOutputDemo{
+  public static void main(String[] args){
+	Res r=new Res();
+	
+	Input in=new Input(r);
+	Output out=new Output(r);
+	
+	Thread t1=new Thread(in);
+	Thread t2=new Thread(out);
+	
+	t1.start();
+	t2.start();
+	
+	}
+}
+
+运行结果(正常)：
+Tom....man
+Jane....woman
+Jane....woman
+Tom....man
+Jane....woman
+Tom....man
+Tom....man
+Tom....man
+Tom....man
+Tom....man
+Jane....woman
+
+
+
+3. 线程间通信-等待唤醒机制
+
+
+上面的运行结果有名字和性别是连一块输出的，这次的需求是存一个，取一个：
+这就需要通过一个标识，比如flag来判断，当输入线程判断flag为false时表示还没有存，就让其存值，
+存完后，该线程还有执行权，就需要将flag改为true，然后进行休眠，并唤醒输出线程；
+另个，输出线程的逻辑与此相反
+
+
+class Res{
+  String name;
+  String sex;
+  boolean flag=false;
+}
+
+class Input implements Runnable{
+  private Res r;
+
+  Input(Res r){
+	this.r=r;
+  }
+	  public void run(){
+		int x=0;
+		while(true){
+			synchronized(r){
+				if(r.flag){
+					try{r.wait();}catch(Exception e){}
+				}
+				if(x==0){
+					r.name="Tom";
+					r.sex="man";
+				}else{
+					r.name="Jane";
+					r.sex="woman";
+				}
+				x=(x+1)%2;
+				
+				r.flag=true;
+				r.notify();									
+			}	
+		}
+	}
+}
+
+
+class Output implements Runnable{
+	private Res r;
+	//Object obj=new Object();
+	Output(Res r){
+		this.r=r;
+	}
+	  public void run(){
+		while(true){
+			synchronized(r){
+				if(!r.flag){
+					try{r.wait();}catch(Exception e){}
+				}
+				System.out.println(r.name+"...."+r.sex);
+				
+				r.flag=false;
+				r.notify();
+			}	
+		}    
+	}
+}
+
+
+public class InputOutputDemo{
+  public static void main(String[] args){
+	Res r=new Res();
+	
+	Input in=new Input(r);
+	Output out=new Output(r);
+	
+	Thread t1=new Thread(in);
+	Thread t2=new Thread(out);
+	
+	t1.start();
+	t2.start();
+	
+	}
+}
+
+
+
+
+
+运行结果:
+Tom....man
+Jane....woman
+Tom....man
+Jane....woman
+Tom....man
+Jane....woman
+Tom....man
+Jane....woman
+Tom....man
+
+
+注意：
+
+wait();
+notify();
+notifyAll();
+
+都使用在同步中，因为要对持有监视器（锁）的线程操作。、
+所以要使用在同步中，因为只有同步才具有锁。
+
+为什么这些操作线程的方法要定义在Object类中呢？
+因为这些方法在操作同步中线程时，都必须要标识它们所操作线程持有的锁，
+只有同一个锁上的被等待线程，可以被同一个锁上notify唤醒
+不可以被不同锁中的线程进行唤醒。
+（比喻：俩波小孩玩抓人游戏，其中一波的被wait的小孩只能被自己那波的人叫醒，另一波的人过来叫是无效的）
+
+也就是说，等待和唤醒必须是同一个锁。
+
+而锁可以是任意对象，所以可以被任意对象调用的方法定义Object类中
+
+
+
+4.线程间通信--代码优化
+
+class Res{
+	private String name;
+	private String sex;
+	private boolean flag=false;
+
+	public synchronized void set(String name,String sex){
+		if(flag){
+			try{this.wait();}catch(Exception e){}
+		}
+			this.name=name;	
+			this.sex=sex;	
+			flag=true;
+			this.notify();		
+		
+	}
+	
+	public synchronized void out(){
+		if(!flag){
+			try{this.wait();}catch(Exception e){}
+		}
+		System.out.println(name+"...."+sex);
+		flag=false;
+		this.notify();
+	}
+}
+
+class Input implements Runnable{
+	private Res r;
+	Input(Res r){
+		this.r=r;
+	}
+	public void run(){
+		int x=0;
+		while(true){		
+			if(x==0){
+				r.set("Kider","man");
+			}else{
+				r.set("Jane","wanman");
+			}
+			x=(x+1)%2;	
+		}		
+	}
+}
+
+
+class Output implements Runnable{
+	private Res r;
+	Output(Res r){
+		this.r=r;
+	}
+	public void run(){
+		while(true){			
+		    r.out();
+		}
+	}
+}
+
+
+public class InputOutputDemo2{
+	public static void main(String[] args){
+		Res r=new Res();
+		new Thread(new Input(r)).start();
+		new Thread(new Output(r)).start();
+	}
+}
+
+
+
+
+
+
+5.线程间通信--生产者消费者
+
+
+下面这个例子中只有两个线程：一个负责生产，一个负责消费
+
+public class ProducerConsumerDemo{
+	public static void main(String[] args){
+		Resouse r=new Resouse();
+		
+		Producer pro=new Producer(r);
+		Consumer con=new Consumer(r);
+		
+		Thread t1=new Thread(pro);
+		Thread t2=new Thread(con);
+		
+		t1.start();
+		t2.start();
+	}
+}
+
+class Resouse{
+	private String name;
+	private int count=1;
+	private boolean flag=false;
+	
+	public synchronized void set(String name){
+		if(flag){
+			try{this.wait();}catch(Exception e){}
+		}
+		this.name=name+"..."+count++;
+		System.out.println(Thread.currentThread().getName()+"..ShengChanZhe.."+this.name);
+		flag=true;
+		this.notify();
+	}
+	
+	public synchronized void out(){
+		if(!flag){
+			try{this.wait();}catch(Exception e){}
+		}
+		System.out.println(Thread.currentThread().getName()+"...XiaoFeiZhe....."+this.name);
+		flag=false;
+		this.notify();
+	}
+}
+
+
+class Producer implements Runnable{
+	Resouse r;
+	Producer(Resouse r){
+		this.r=r;
+	}
+	
+	public void run(){
+		while(true){
+			r.set("ShangPing");
+		}
+	}
+}
+
+
+class Consumer implements Runnable{
+	Resouse r;
+	Consumer(Resouse r){
+		this.r=r;
+	}
+	
+	public void run(){
+		while(true){
+			r.out();
+		}
+	}
+}
+
+运行结果：
+Thread-0..ShengChanZhe..ShangPing...1
+Thread-1...XiaoFeiZhe.....ShangPing...1
+Thread-0..ShengChanZhe..ShangPing...2
+Thread-1...XiaoFeiZhe.....ShangPing...2
+Thread-0..ShengChanZhe..ShangPing...3
+Thread-1...XiaoFeiZhe.....ShangPing...3
+Thread-0..ShengChanZhe..ShangPing...4
+Thread-1...XiaoFeiZhe.....ShangPing...4
+Thread-0..ShengChanZhe..ShangPing...5
+Thread-1...XiaoFeiZhe.....ShangPing...5
+
+
+
+
+
+对于多个生产者和消费者。
+为什么要定义while判断标记。
+原因：让被唤醒的线程再一次判断标记。
+
+为什么定义notifyAll
+因为需要唤醒对方线程。
+如果只用notify，容易出现只唤醒本方线程的情况，导致程序中的所有都等待
+
+第二个例子：有多个线程时，比如两个线程生产，两个线程消费
+
+public class ProducerConsumerDemo{
+	public static void main(String[] args){
+		Resouse r=new Resouse();
+		
+		Producer pro=new Producer(r);
+		Consumer con=new Consumer(r);
+		
+		Thread t1=new Thread(pro);
+		Thread t2=new Thread(pro);
+		Thread t3=new Thread(con);
+		Thread t4=new Thread(con);
+		
+		t1.start();
+		t2.start();
+		t3.start();
+		t4.start();
+	}
+}
+
+class Resouse{
+	private String name;
+	private int count=1;
+	private boolean flag=false;
+	
+	public synchronized void set(String name){
+		while(flag){
+			try{this.wait();}catch(Exception e){}
+		}
+		this.name=name+"..."+count++;
+		System.out.println(Thread.currentThread().getName()+"..ShengChanZhe.."+this.name);
+		flag=true;
+		this.notifyAll();
+	}
+	
+	public synchronized void out(){
+		while(!flag){
+			try{this.wait();}catch(Exception e){}
+		}
+		System.out.println(Thread.currentThread().getName()+"...XiaoFeiZhe......."+this.name);
+		flag=false;
+		this.notifyAll();
+	}
+}
+
+
+class Producer implements Runnable{
+	Resouse r;
+	Producer(Resouse r){
+		this.r=r;
+	}
+	
+	public void run(){
+		while(true){
+			r.set("ShangPing");
+		}
+	}
+}
+
+
+class Consumer implements Runnable{
+	Resouse r;
+	Consumer(Resouse r){
+		this.r=r;
+	}
+	
+	public void run(){
+		while(true){
+			r.out();
+		}
+	}
+}
+
+
+当不用while循环时，会出现如下两种情况：
+
+一是：生产一个消费二个
+Thread-0..ShengChanZhe..ShangPing...414
+Thread-3...XiaoFeiZhe.......ShangPing...414
+Thread-2...XiaoFeiZhe.......ShangPing...414
+
+
+二是：生产二个消费一个
+Thread-1..ShengChanZhe..ShangPing...396
+Thread-0..ShengChanZhe..ShangPing...397
+Thread-3...XiaoFeiZhe.......ShangPing...397
+
+
+把if换成while，并把notify换成notifyAll,打印出正常结果：
+Thread-1..ShengChanZhe..ShangPing...223
+Thread-2...XiaoFeiZhe.......ShangPing...223
+Thread-0..ShengChanZhe..ShangPing...224
+Thread-3...XiaoFeiZhe.......ShangPing...224
+Thread-1..ShengChanZhe..ShangPing...225
+Thread-2...XiaoFeiZhe.......ShangPing...225
+Thread-0..ShengChanZhe..ShangPing...226
+Thread-3...XiaoFeiZhe.......ShangPing...226
+
+
+注意：
+1.当用之前的if而不用while时，其中一线程若在wait后会直接执行下面的语句，而不用判断是否可以去执行它，
+这样会导致生产两个，而最后只消费一个等情况；
+2.当都使用while后，线程在执行代码时都会去判断是否可执行，这样就避免了生产与消费不对等的情况
+3.在此例子中有多个线程时，如果只使用notify，那么当遇到其中一线程只是去叫醒本方的线程时就容易出现4个线程全部等待（条件是其它三个线程都wait中）
+4.当使用notifyAll时，就会把线程池中其它wait中的线程全部唤醒，这样就不会出现4个线程都等待的情况。
+
+
+
+
+
+
+
+6.线程间通信--生产者消费者JDK1.5升级版
+
+
+第一个例子中只是把之前用synchronized和notify、notifyAll的地方换成了JDK1.5升级后的表现形式。
+而且唤醒线程的方式还是使用的全部唤醒
+
+import java.util.concurrent.locks.*;
+
+
+public class ProducerConsumerDemo2{
+	public static void main(String[] args){
+		Resouse r=new Resouse();
+		
+		Producer pro=new Producer(r);
+		Consumer con=new Consumer(r);
+		
+		Thread t1=new Thread(pro);
+		Thread t2=new Thread(pro);
+		Thread t3=new Thread(con);
+		Thread t4=new Thread(con);
+		
+		t1.start();
+		t2.start();
+		t3.start();
+		t4.start();
+	}
+}
+
+class Resouse{
+	private String name;
+	private int count=1;
+	private boolean flag=false;
+	private Lock lock=new ReentrantLock();
+	private Condition condition=lock.newCondition();
+	
+	public void set(String name) throws InterruptedException
+	{
+		lock.lock();
+		try{
+			while(flag){
+				condition.await();
+			}
+			this.name=name+"..."+count++;
+			System.out.println(Thread.currentThread().getName()+"..ShengChanZhe.."+this.name);
+			flag=true;
+			condition.signalAll();
+		}
+		finally{
+			lock.unlock();
+		}
+		
+	}
+	
+	public  void out() throws InterruptedException
+	{
+		lock.lock();
+		try{
+			while(!flag){
+				condition.await();
+			}
+			System.out.println(Thread.currentThread().getName()+"...XiaoFeiZhe......."+this.name);
+			flag=false;
+			condition.signalAll();
+		}	
+		finally{
+			lock.unlock();
+		}
+	}
+}
+
+
+class Producer implements Runnable{
+	Resouse r;
+	Producer(Resouse r){
+		this.r=r;
+	}
+	
+	public void run(){
+		while(true){
+			try{
+				r.set("ShangPing");
+			}catch(InterruptedException e){
+				
+			}
+			
+		}
+	}
+}
+
+
+class Consumer implements Runnable{
+	Resouse r;
+	Consumer(Resouse r){
+		this.r=r;
+	}
+	
+	public void run(){
+		while(true){
+			try{
+				r.out();
+			}catch(InterruptedException e){
+				
+			}
+		}
+	}
+}
+
+
+
+第二个例子：
+JDK1.5中提供了多线程升级解决方案。
+将同步synchronized替换成现实Lock操作。
+将Ojbect中的wait、notify、notifyAll，替换了Condition对象。
+该对象可以Lock锁，进行获取。
+该示例中，实现了本方只唤醒对方操作。
+（一个生产的Condition和一个消费的Condition）
+
+注意：在finally中释放锁的操作一定要执行；
+若该unlock操作不在这里面执行，那么当前面执行的语句抛出异常后就不会往下执行，
+也就不会进行解锁操作，这样其它线程都拿不到锁；
+
+ 
+
+public class ProducerConsumerDemo2{
+	public static void main(String[] args){
+		Resouse r=new Resouse();
+		
+		Producer pro=new Producer(r);
+		Consumer con=new Consumer(r);
+		
+		Thread t1=new Thread(pro);
+		Thread t2=new Thread(pro);
+		Thread t3=new Thread(con);
+		Thread t4=new Thread(con);
+		
+		t1.start();
+		t2.start();
+		t3.start();
+		t4.start();
+	}
+}
+
+class Resouse{
+	private String name;
+	private int count=1;
+	private boolean flag=false;
+	
+	private Lock lock=new ReentrantLock();
+	private Condition condition_pro=lock.newCondition();
+	private Condition condition_con=lock.newCondition();
+
+	
+	public void set(String name) throws InterruptedException
+	{
+		lock.lock();
+		try{
+			while(flag){
+				condition_pro.await();
+			}
+			this.name=name+"..."+count++;
+			System.out.println(Thread.currentThread().getName()+"..ShengChanZhe.."+this.name);
+			flag=true;
+			condition_con.signal();
+		}
+		finally{
+			lock.unlock();
+		}
+		
+	}
+	
+	public  void out() throws InterruptedException
+	{
+		lock.lock();
+		try{
+			while(!flag){
+				condition_con.await();
+			}
+			System.out.println(Thread.currentThread().getName()+"...XiaoFeiZhe......."+this.name);
+			flag=false;
+			condition_pro.signal();
+		}	
+		finally{
+			lock.unlock();
+		}
+	}
+}
+
+
+class Producer implements Runnable{
+	Resouse r;
+	Producer(Resouse r){
+		this.r=r;
+	}
+	
+	public void run(){
+		while(true){
+			try{
+				r.set("ShangPing");
+			}catch(InterruptedException e){
+				
+			}
+			
+		}
+	}
+}
+
+
+class Consumer implements Runnable{
+	Resouse r;
+	Consumer(Resouse r){
+		this.r=r;
+	}
+	
+	public void run(){
+		while(true){
+			try{
+				r.out();
+			}catch(InterruptedException e){
+				
+			}
+		}
+	}
+}
+
+
+
+
+
+
+7.多线程--停止线程
+
+stop方法已经过时。
+
+如何停止线程？
+只有一种，run方法结束。
+开启多线程运行，运行代码通常是循环结构。
+
+只要控制住循环，就可以让run方法结束，也就是线程结束。
+
+特殊情况：
+当线程处于了冻结状态。
+就不会读取到标记，那么线程就不会结束。
+
+当没有指定的方式让冻结的线程恢复到运行状态时，这时需要对冻结进行清除。
+强制让线程恢复到运行状态中来，这样就可以操作标记让线程结束。
+
+Thread类提供该方法 interrupt();
+
+
+
+例子一：
+线程停止运行条件：当主线程的num等于60时，线程就停止运行
+
+class StopThread implements Runnable{
+	private boolean flag=true;
+	public void run(){
+		while(flag){
+			System.out.println(Thread.currentThread().getName()+"....run");
+		}
+	}
+	
+	public void changeFlag(){
+		flag=false;
+	}
+}
+
+class StopThreadDemo{
+	public static void main(String[] args){
+		
+		StopThread st=new StopThread();
+		
+		Thread t1=new Thread(st);
+		Thread t2=new Thread(st);
+		
+		t1.start();
+		t2.start();
+		
+		int num=0;
+		
+		while(true){
+			if(num++ ==60){
+				st.changeFlag();
+				break;
+			}
+			System.out.println(Thread.currentThread().getName()+"..."+num);
+		}
+	}
+}
+
+
+
+例子二：
+特殊情况：当加上同步之后，使用wait，线程就不会全部执行完，原因是线程t1和t2都wait了
+
+class StopThread implements Runnable{
+	private boolean flag=true;
+	public synchronized void run(){
+		while(flag){
+			try{
+				wait();
+			}catch(InterruptedException e){
+				System.out.println(Thread.currentThread().getName()+"....Exception");
+			}
+			System.out.println(Thread.currentThread().getName()+"....run");
+		}
+	}
+	
+	public void changeFlag(){
+		flag=false;
+	}
+}
+
+class StopThreadDemo{
+	public static void main(String[] args){
+		
+		StopThread st=new StopThread();
+		
+		Thread t1=new Thread(st);
+		Thread t2=new Thread(st);
+		
+		t1.start();
+		t2.start();
+		
+		int num=0;
+		
+		while(true){
+			if(num++ ==60){
+				st.changeFlag();
+				break;
+			}
+			System.out.println(Thread.currentThread().getName()+"..."+num);
+		}
+		System.out.println("over");
+	}
+}
+
+
+
+例子三：
+让wait(冻结状态)中的t1和t2两线程强行停止，让它们恢复到运行中来；
+
+class StopThread implements Runnable{
+	private boolean flag=true;
+	public synchronized void run(){
+		while(flag){
+			try{
+				wait();
+			}catch(InterruptedException e){
+				System.out.println(Thread.currentThread().getName()+"....Exception");
+				flag=false;
+			}
+			System.out.println(Thread.currentThread().getName()+"....run");
+		}
+	}
+	
+	public void changeFlag(){
+		flag=false;
+	}
+}
+
+class StopThreadDemo{
+	public static void main(String[] args){
+		
+		StopThread st=new StopThread();
+		
+		Thread t1=new Thread(st);
+		Thread t2=new Thread(st);
+		
+		t1.start();
+		t2.start();
+		
+		int num=0;
+		
+		while(true){
+			if(num++ ==60){
+				t1.interrupt();
+				t2.interrupt();
+				break;
+			}
+			System.out.println(Thread.currentThread().getName()+"..."+num);
+		}
+		System.out.println("over");
+	}
+}
+
+运行结果：
+main...57
+main...58
+main...59
+main...60
+over
+Thread-1....Exception
+Thread-1....run
+Thread-0....Exception
+Thread-0....run
+
+E:\learnjava>
+
+
+
+
+
+8.多线程--守护线程
+
+java api: public final void setDaemon(boolean on)
+将该线程标记为守护线程或用户线程。当正在运行的线程都是守护线程时，Java虚拟机退出。
+该方法必须在启动线程前调用。
+
+class StopThread implements Runnable{
+	private boolean flag=true;
+	public void run(){
+		while(flag){
+			System.out.println(Thread.currentThread().getName()+"....run");
+		}
+	}
+	
+	public void changeFlag(){
+		flag=false;
+	}
+}
+
+class StopThreadDemo{
+	public static void main(String[] args){
+		
+		StopThread st=new StopThread();
+		
+		Thread t1=new Thread(st);
+		Thread t2=new Thread(st);
+		
+		t1.setDaemon(true);
+		t2.setDaemon(true);
+		
+		t1.start();
+		t2.start();
+		
+		int num=0;
+		
+		while(true){
+			if(num++ ==60){
+			//	st.changeFlag();
+				break;
+			}
+			System.out.println(Thread.currentThread().getName()+"..."+num);
+		}
+	}
+}
+
+
+注意：在上面的例子中如果不把多线程设置为守护线程，则会无限的运行下去。
+这个就记住两点：1.在线程启动前调用    2.当前台线程执行完后，剩下都是守护线程（后台线程）时，jvm就退出了。
+
+
+
+
+9.多线程--Join方法
+
+join：
+当A线程执行到了B线程的.join()方法时，A就会等待。等B线程都执行完，A才会执行。
+
+join可以用来临时加入线程执行。
+
+class Demo implements Runnable{
+
+	public void run(){
+		for(int i=0;i<=30;i++){
+			System.out.println(Thread.currentThread().getName()+"..."+i);
+		}
+	}
+}
+
+
+class JoinDemo{
+	public static void main(String[] args) throws Exception
+	{
+		Demo d=new Demo();
+		
+		Thread t1=new Thread(d);
+		Thread t2=new Thread(d);
+		
+		t1.start();
+		t1.join();
+		t2.start();
+		//t1.join();
+		
+		for(int x=1;x<=50;x++){
+			System.out.println("main...."+x);
+		}
+		
+		System.out.println("over");
+	}
+}
+
+
+
+
+
+10.优先级&yield方法
+
+例子一：通过线程对象的toString()方法，返回该线程的字符表现形式，包括线程名称、优先级和线程组。
+在该程序的运行结果[Thread-0,5,main]中已经表示；
+优先级为从1到10
+一般情况下谁开启某个线程，那么该线程就属于那个组，因为在这个程序中该线程是在main里面开启的。
+
+设置优先级后，线程抢夺cpu的资源相对来说要高一些。
+
+
+
+
+class Demo implements Runnable{
+
+	public void run(){
+		for(int i=0;i<=30;i++){
+			System.out.println(Thread.currentThread().toString()+"..."+i);
+		}
+	}
+}
+
+
+class PriorityDemo{
+	public static void main(String[] args) throws Exception
+	{
+		Demo d=new Demo();
+		
+		Thread t1=new Thread(d);
+		Thread t2=new Thread(d);
+		
+		t1.start();
+
+		t1.setPriority(Thread.MAX_PRIORITY);   //为t1设置优先级为最高
+		
+		t2.start();
+
+		
+		for(int x=1;x<=50;x++){
+			//System.out.println("main...."+x);
+		}
+		
+		System.out.println("over");
+	}
+}
+
+运行结果:
+Thread[Thread-0,10,main]...27
+Thread[Thread-0,10,main]...28
+Thread[Thread-0,10,main]...29
+Thread[Thread-0,10,main]...30
+Thread[Thread-1,5,main]...9
+Thread[Thread-1,5,main]...10
+Thread[Thread-1,5,main]...11
+
+
+
+
+第二个例子：
+
+java api: public static void yield();
+表示：暂停当前正在执行的线程对象，并执行其它线程。
+
+
+强制让线程的执行权释放出来。
+稍微减少线程执行的频率，而且能达到线程都有平均运行的效果。
+如果不释放执行权的话，执行起来可能一个线程会连着执行多次，再另一个线程执行。
+
+
+class Demo implements Runnable{
+
+	public void run(){
+		for(int i=0;i<=30;i++){
+			System.out.println(Thread.currentThread().toString()+"..."+i);
+			Thread.yield();
+		}
+	}
+}
+
+
+class PriorityDemo{
+	public static void main(String[] args) throws Exception
+	{
+		Demo d=new Demo();
+		
+		Thread t1=new Thread(d);
+		Thread t2=new Thread(d);
+		
+		t1.start();
+		
+		t2.start();
+
+		
+		for(int x=1;x<=50;x++){
+			//System.out.println("main...."+x);
+		}
+		
+		System.out.println("over");
+	}
+}
+
+运行结果：
+
+Thread[Thread-1,5,main]...26
+Thread[Thread-0,5,main]...26
+Thread[Thread-1,5,main]...27
+Thread[Thread-0,5,main]...27
+Thread[Thread-1,5,main]...28
+Thread[Thread-0,5,main]...28
+Thread[Thread-1,5,main]...29
+Thread[Thread-0,5,main]...29
+Thread[Thread-1,5,main]...30
+Thread[Thread-0,5,main]...30
+
+上面的结果中，线程0 1 0 1的基本上开始交替运行。
+
+
+
+
+例子三:
+在这个例子中主要说的是在一般开发中当有多个要运行的循环时，如果前面的循环没有执行完的话，后面的都执行不了。
+所以解决的办法是利用线程结合匿名内部类的方式来运行，这样就可以都同时运行
+下面给出两种内部类的方式，一是在继承Thread的子类对象 ，二种是实现Runnable的子类对象
+
+当然也可以直接写一个类的方式，然后被调用。
+
+class PriorityDemo{
+	public static void main(String[] args) throws Exception
+	{
+		new Thread(){
+			public void run(){
+				for(int i=0;i<=30;i++){
+					System.out.println("+++++one++++++"+i);			
+				}	
+			}			
+		}.start();
+		
+		
+		Runnable b=new Runnable(){
+			public void run(){
+				for(int i=0;i<=30;i++){
+					System.out.println("+++++two++++++"+i);			
+				}	
+			}	
+		};
+		new Thread(b).start();
+		
+			
+		for(int i=0;i<=30;i++){
+			System.out.println("+++++three++++++"+i);			
+		}
+			
+		//new Test().start();
+	}
+}
+
+class Test extends Thread{
+	public void run(){
+		for(int i=0;i<=30;i++){
+			System.out.println("+++++four++++++"+i);			
+		}	
+	}
+}
