@@ -153,7 +153,7 @@ class StringMethodDemo{
 
 	3.1将字符数组转成字符串。
 		构造函数：String(char[])
-				  String(char[],offset,count):将字符数组中的一部分转成字符串。
+				  String(char[],offset,count):将字符数组中的一部分转成字符串。注意：是从offset开始，截取count个字符
 	
 		静态方法：
 				static String copyValueOf(char[]);

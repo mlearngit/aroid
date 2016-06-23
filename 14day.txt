@@ -74,7 +74,7 @@ class CollectionDemo{
 		a12.add("java04");
 		
 		
-		//al1.retainAll(al2);//去交集，all中只会保留和al2中相同的元素。
+		//al1.retainAll(al2);//去交集，al1中只会保留和al2中相同的元素。
 		sop("al1:"+al1);
 		sop("al2:"+al2);
 	}
@@ -90,7 +90,7 @@ class CollectionDemo{
 		
 		Iterator it=al.iterator();//获取迭代器，用于取出集合中的元素。
 		while(it.hasNext()){
-			sop(it.next());
+			sop(it.next()); 
 		}
 		
 		for(Iterator it=al.iterator();it.hasNext();){
@@ -411,8 +411,8 @@ class LinkedListDemo{
 
 使用LinkedList模拟一个堆栈或者队列数据结构。
 
-堆栈：先进先出 ，  如同一个杯子
-队列：先进后出 ，  First in First out   FIFO 如同一个水管。
+堆栈：先进后出 ，  如同一个杯子
+队列：先进先出 ，  First in First out   FIFO 如同一个水管。
 
 下方类DuiLie中把LinkedList封装了下
 
