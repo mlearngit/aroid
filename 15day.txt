@@ -1,0 +1,371 @@
+1.集合框架(TreeSet)
+
+Set：无序，不可以重复元素。
+	｜-HashSet：数据是哈希表，线程是非同步的。
+				保证元素唯一性的原理：判断元素的hashcode值是否相同。
+				如果相同，还会继续判断元素的equals方法，是否为true;
+	
+	|-TreeSet:可以对Set集合中的元素进行排序。
+	
+import java.util.*;
+
+class TreeSetDemo{
+	public static void main(String[] args){
+		TreeSet ts=new TreeSet();
+		
+		ts.add("dcef");
+		ts.add("aefa");
+		ts.add("bcdf");
+		ts.add("bafk");
+		
+		Iterator it=ts.iterator();
+		
+		while(it.hasNext()){
+			System.out.println(it.next());
+		}
+	}
+}
+
+
+运行结果：
+aefa
+bafk
+bcdf
+dcef
+
+
+
+2.集合框架（TreeSet存储自定义对象）
+
+
+需求：
+往TreeSet集合中存储自定义对象学生。
+想按照学生的年龄进行排序。
+
+记住，排序时，当主要条件相同时，一定判断一下次要条件。
+
+TreeSet默认会把传入的对象进行排序的，要让对象进行排序就得实现Comparable接口
+
+import java.util.*;
+
+
+class TreeSetDemo2{
+	public static void main(String[] args){
+		TreeSet t=new TreeSet();
+		
+		t.add(new Student("lisi02",22));
+		t.add(new Student("lisi007",20));
+		t.add(new Student("lisi09",19));
+		t.add(new Student("lisi08",19));
+		t.add(new Student("lisi007",20));
+		//t.add(new Student("lisi01",40));
+		
+		
+		Iterator it=t.iterator();
+		
+		while(it.hasNext()){
+			Student s=(Student)it.next();
+			System.out.println(s.getName()+"............."+s.getAge());
+		}
+	}
+}
+
+class Student implements Comparable{  //该接口强制让学生具备比较性
+	private String name;
+	private int age;
+	
+	Student(String name,int age){
+		this.name=name;
+		this.age=age;
+	}
+	
+	public int compareTo(Object obj){
+		if(!(obj instanceof Student)){
+			throw new RuntimeException("lei xing error");
+		}
+		
+		Student s=(Student)obj;
+		System.out.println(this.name+".......compareTo....."+s.name);
+		if(this.age>s.age){
+			return 1;
+		}
+		if(this.age==s.age){
+			return this.name.compareTo(s.name);
+		}
+	
+		return -1;	
+	}
+	
+	public String getName(){
+		return name;
+	}
+	
+	public int getAge(){
+		return age;
+	}
+}
+
+
+运行结果：
+lisi02.......compareTo.....lisi02
+lisi007.......compareTo.....lisi02
+lisi09.......compareTo.....lisi02
+lisi09.......compareTo.....lisi007
+lisi08.......compareTo.....lisi007
+lisi08.......compareTo.....lisi09
+lisi007.......compareTo.....lisi007
+lisi08.............19
+lisi09.............19
+lisi007.............20
+lisi02.............22
+
+
+
+3. 集合框架（二叉树）
+
+|-TreeSet:可以对Set集合中的元素进行排序。
+		  底层数据结构是二叉树。
+		  保证元素唯一性的依据：compareTo方法return 0
+		  （返回0表示元素相同）
+		  
+		  Tree排序的第一种方式：让元素自身具备比较性。
+		  元素需要实现Comparable接口，覆盖compareTo方法。
+		  这种方式也成为元素的自然顺序，或者叫做默认顺序。
+
+
+注意：TreeSet跟哈希值没有关系，只有HashSet关联的哈希值。而TreeSet走的是二叉树结构，且使用的是compareTo方法
+	  来确定元素是否相同（如果要判断该集合中是否包含或删除元素走的都是compareTo）
+	  
+	  
+	  
+需求：让元素按存入的顺序输出来（若要倒序输入，则直接返回-1即可）
+
+import java.util.*;
+
+
+class TreeSetDemo2{
+	public static void main(String[] args){
+		TreeSet t=new TreeSet();
+		
+		t.add(new Student("lisi02",22));
+		t.add(new Student("lisi007",20));
+		t.add(new Student("lisi09",19));
+		t.add(new Student("lisi08",19));
+		t.add(new Student("lisi007",20));
+		//t.add(new Student("lisi01",40));
+		
+		
+		Iterator it=t.iterator();
+		
+		while(it.hasNext()){
+			Student s=(Student)it.next();
+			System.out.println(s.getName()+"............."+s.getAge());
+		}
+	}
+}
+
+class Student implements Comparable{  //该接口强制让学生具备比较性
+	private String name;
+	private int age;
+	
+	Student(String name,int age){
+		this.name=name;
+		this.age=age;
+	}
+	
+	public int compareTo(Object obj)
+	
+		return 1;
+	
+	/*
+		if(!(obj instanceof Student)){
+			throw new RuntimeException("lei xing error");
+		}
+		
+		Student s=(Student)obj;
+		System.out.println(this.name+".......compareTo....."+s.name);
+		if(this.age>s.age){
+			return 1;
+		}
+		if(this.age==s.age){
+			return this.name.compareTo(s.name);
+		}
+	
+		return -1;	
+		
+	*/
+	}
+	
+	public String getName(){
+		return name;
+	}
+	
+	public int getAge(){
+		return age;
+	}
+}
+
+
+
+
+
+
+4.集合框架（实现Comparator方式排序）
+
+  TreeSet的第二种排序方式。
+  当元素自身不具备比较性时，或者具备的比较性不是所需要的。
+  这时就需要让集合自身具备比较性。
+  在集合初始化时，就有了比较方式。
+  
+  定义了比较器，将比较器对象作为参数传递给TreeSet集合的构造函数。
+  
+  当两种排序都存在时，以比较器为主。
+  
+  定义一个类，实现Comparator接口，覆盖compare方法。
+  
+	
+	
+
+  
+import java.util.*;
+
+class Student implements Comparable{
+	private String name;
+	private int age;
+	
+	Student(String name,int age){
+		this.name=name;
+		this.age=age;
+	}
+	
+	public int compareTo(Object obj){
+	
+	
+		if(!(obj instanceof Student)){
+			throw new RuntimeException("lei xing error");
+		}
+		
+		Student s=(Student)obj;
+		
+		if(this.age>s.age){
+			return 1;
+		}
+		if(this.age==s.age){
+			return this.name.compareTo(s.name);
+		}
+	
+		return -1;
+		
+	
+	}
+	
+	public String getName(){
+		return name;
+	}
+	
+	public int getAge(){
+		return age;
+	}
+}
+
+
+class TreeSetDemo3{
+	public static void main(String[] args){
+	  TreeSet ts=new TreeSet(new MyCompare());
+	  
+	  ts.add(new Student("lisi02",22));
+	  ts.add(new Student("lisi02",21));
+	  ts.add(new Student("lisi007",20));
+	  ts.add(new Student("lisi09",19));
+	  ts.add(new Student("lisi06",18));
+	  ts.add(new Student("lisi06",18));
+	  ts.add(new Student("lisi007",29));
+	  
+	  Iterator it=ts.iterator();
+		
+		while(it.hasNext()){
+			Student s=(Student)it.next();
+			System.out.println(s.getName()+"............."+s.getAge());
+		}
+	}
+}
+
+
+class MyCompare implements Comparator{
+	public int compare(Object o1,Object o2){
+		
+		Student s1=(Student)o1;
+		Student s2=(Student)o2;
+		
+		int num=s1.getName().compareTo(s2.getName());
+		
+		if(num==0){
+			
+			return new Integer(s1.getAge()).compareTo(new Integer(s2.getAge()));
+			
+			/*
+			//可以将下面这种方式换成上面直接通过使用Integer的方式
+			if(s1.getAge()>s2.getAge())
+				return 1;
+			if(s1.getAge()==s2.getAge())
+				return 0;
+			return -1;
+			*/
+		}
+		return num;
+	}
+}
+
+
+
+
+
+5.集合框架(TreeSet练习)
+
+练习：按照字符串长度排序
+
+import java.util.*;
+
+class TreeSetTest{
+	public static void main(String[] args){
+		TreeSet ts=new TreeSet(new StrLenComparator());
+		
+		ts.add("abcd");
+		ts.add("cc");
+		ts.add("cba");
+		ts.add("aaa");
+		ts.add("z");
+		ts.add("hahaha");
+		
+		Iterator it=ts.iterator();
+		
+		while(it.hasNext()){
+		
+			System.out.println(it.next());
+		}
+	}
+}
+
+class StrLenComparator implements Comparator{
+	public int compare(Object o1,Object o2){
+		String s1=(String)o1;
+		String s2=(String)o2;
+		
+		int num=new Integer(s1.length()).compareTo(new Integer(s2.length()));
+		
+		if(num==0)
+			return s1.compareTo(s2);
+		
+		return num;
+		
+		/*
+		if(s1.length()>s2.length())
+			return 1;
+		if(s1.length()==s2.length())
+			return 0;
+		return -1;
+		*/
+		
+		
+	}	
+}

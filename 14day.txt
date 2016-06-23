@@ -157,7 +157,7 @@ List：
 
 
 
-5.（代码中包含前段4中的）	
+5.（代码中包含第4段中的）	
 List集合特有的迭代器。ListIterator是Iterator的子接口。
 
 在迭代时，不可以通过集合对象的方法操作集合中的元素。
@@ -215,7 +215,7 @@ class ListDemo{
 		//通过IndexOf获取对象的位置。
 		sop("index="+al.indexOf("java02"));
 		
-		List sub=al.subList(1,3);
+		List sub=al.subList(1,3);   //包含角标1，但不包括角标3之间的元素
 		sop("sub="+sub);
 	}
 	
@@ -269,7 +269,7 @@ class ListDemo{
 			
 			if(obj.equals("java02")){
 				//al.add("java008"); //执行此句会报异常ConcurrentModificationException，原因是在迭代的时候不能使用集合中的方法
-				it.remove(); 只是将java02的引用从集合中删除了，但元素还在内存中
+				it.remove(); 只是将java02的【引用】从集合中删除了，但元素还在内存中
 			}
 			
 			sop("obj="+obj);
@@ -288,6 +288,8 @@ class ListDemo{
 	}
 	
 }
+
+
 
 
 
@@ -512,3 +514,368 @@ class ArrayListTest{
 		System.out.println(obj);
 	}
 }
+
+
+
+
+
+11.集合框架（ArrayList练习2）
+
+之前直接是存相同的字符串！
+
+现在将自定义对象作为元素存到ArrayList集合中，并去除重复元素。
+
+比如：存人对象，同姓名同年龄，视为同一个人，为重复元素。
+
+1.对人描述，将数据封装进人对象。
+2.定义容器，将人存入
+3.取出、删除的操作，
+
+List集合判断元素是否相同，依据是元素的equals方法。
+
+在contains 和 remove这两个方法的底层都调用了equals方法
+
+import java.util.*;
+
+class Person{
+	private String name;
+	private int age;
+	
+	public Person(String name,int age){
+		this.name=name;
+		this.age=age;
+	}
+	
+	public boolean equals(Object obj){
+		if(!(obj instanceof Person)){
+			return false;
+		}
+		
+		Person p=(Person)obj;
+		//System.out.println(this.name+"----"+p.name);
+		return this.name.equals(p.name) && (this.age==p.age);
+	}
+	
+	public String getName(){
+		return name;
+	}
+	
+	public int getAge(){
+		return age;
+	}
+}
+
+class ArrayListTest2{
+	public static void main(String[] args){
+		ArrayList al=new ArrayList();
+		
+		al.add(new Person("lisi01",21));
+		al.add(new Person("lisi02",22));
+		al.add(new Person("lisi03",23));
+		al.add(new Person("lisi02",22));
+		//al.add(new Person("lisi05",25));
+		//al.add(new Person("lisi05",25));
+		
+		
+		al=singeArray(al);
+		
+		//sop("remove--"+al.remove(new Person("lisi04",24)));
+		
+		Iterator it=al.iterator();
+		
+		while(it.hasNext()){
+			Object obj=it.next();
+			Person p=(Person)obj;
+			sop(p.getName()+"---"+p.getAge());
+		}
+	
+		
+	
+	}
+	
+	public static void sop(Object obj){
+		System.out.println(obj);
+	}
+	
+	public static ArrayList singeArray(ArrayList al){
+		ArrayList newal=new ArrayList();
+		
+		Iterator it=al.iterator();
+		
+		while(it.hasNext()){
+			
+			Object obj=it.next();
+			
+			if(!newal.contains(obj)){
+				newal.add(obj);
+			}
+		}
+		return newal;
+	}
+}
+
+
+
+
+
+
+12.集合框架（HashSet）
+
+|--Set: 元素是无序（存入和取出的顺序不一定一致），元素不可以重复。
+		|--HashSet 底层数据结构是哈希表。
+		|--TreeSet:
+Set集合的功能和Collection是一致的。
+
+
+当对象存入Set集合时，先判断在哈希表里面看这个对象的哈希值是否有一样的，如果有一样的哈希值，
+那就调用equals方法看它俩的对象(内容)是否一样
+若一样，则该对象不能存入；若不一样，则可以存入集合
+
+两个不同的对象，它们的哈希值可能会一样，但是它们的对象(内容)不一定一样
+如果两个对象的equals是一样的，则他们的哈希值一定一样
+
+
+在Set集合内部存储的元素不是按照存入时的顺序存的，而是按照其哈希值的顺序存的
+如果存入的哈希值一样的话，它内部会再作一个验证，就是判断这两的对象是否一致。
+
+在比较的时候可以只复写equals方法，而不复写hashCode方法吗？
+答：当不复写hashCode方法时，在向Set集合中添加对象时会调用Object默认的hashCode方法返回哈希值
+可是，当用Ojbect默认的hashCode方法返回的哈希值永远是不一样的，这样就不会去调用复写的equals方法，
+因此就无法对自定义对象进行比较（对象去重）
+
+
+import java.util.*;
+
+class HashSetDemo{
+	public static void main(String[] args){
+		HashSet hs=new HashSet();
+		
+		sop(hs.add("java01")); //add返回值是布尔值
+		sop(hs.add("java01")); //判断内容一样返回false
+		hs.add("java02");
+		hs.add("java03");
+		hs.add("java04");
+		
+		Iterator it=hs.iterator();
+		while(it.hasNext()){
+			sop(it.next());
+		}
+	}
+	
+	public static void sop(Object obj){
+		System.out.println(obj);
+	}
+}
+
+
+运行结果：
+E:\learnjava>java  HashSetDemo
+true
+false
+java04
+java02
+java03
+java01
+
+
+
+
+
+
+
+13.集合框架（HashSet存储自定义对象）
+
+|--Set: 元素是无序（存入和取出的顺序不一定一致），元素不可以重复。
+		|--HashSet 底层数据结构是哈希表。
+		   HashSet是如何保证元素唯一性的呢？
+		   是通过元素的两个方法，hashCode和equals来完成。
+		   如果元素的HashCode值相同，才会判断equals是否为true.
+		   如果元素的HashCode值不同，不会调用equals.
+		|--TreeSet:
+		
+		
+import java.util.*;
+
+class Person{
+
+	private String name;
+	private int age;
+
+	public Person(String name,int age){
+		this.name=name;
+		this.age=age;
+	}
+
+	public int hashCode(){
+		System.out.println(this.name+"........hashcode");
+		return this.name.hashCode()+this.age*37;
+		//return 60;   //如果返回一样哈希值，就会每次去调用equals，会造成不必要的判断；
+	}
+
+	public boolean equals(Object obj){
+		if(!(obj instanceof Person)){
+			return false;
+		}
+		
+		Person p=(Person)obj;
+		System.out.println(this.name+".......equals......"+p.name);
+		return this.name.equals(p.name) && this.age==p.age;
+	}
+
+	public String getName(){
+		return name;
+	}
+
+	public int getAge(){
+		return age;
+	}
+}
+
+
+class HashSetTest{
+	public static void main(String[] args) {
+		HashSet  hs=new HashSet();
+
+		hs.add(new Person("a1",11));
+		hs.add(new Person("a2",12));
+		hs.add(new Person("a3",13));
+		hs.add(new Person("a2",12));
+
+		Iterator it=hs.iterator();
+
+		while(it.hasNext()){
+			Person p=(Person)it.next();
+
+			sop(p.getName()+"...."+p.getAge());
+		}
+	}
+
+	public static void sop(Object obj){
+		System.out.println(obj);
+	}
+}
+
+
+以上运行结果：
+a1........hashcode
+a2........hashcode
+a3........hashcode
+a2........hashcode
+a2.......equals......a2
+a1....11
+a3....13
+a2....12
+
+
+如果把hashcode返回值改成固定值的，那么运行结果为：
+a1........hashcode
+a2........hashcode
+a2.......equals......a1
+a3........hashcode
+a3.......equals......a2
+a3.......equals......a1
+a2........hashcode
+a2.......equals......a3
+a2.......equals......a2
+a3....13
+a2....12
+a1....11
+
+
+
+
+
+14.集合框架(HashSet判断和删除的依据)
+
+以下代码跟上一节基本一样，只是增加了两种情况的逻辑：contains和remove
+
+注意：对于判断元素是否存在，以及删除等操作，依赖的方法是元素的hashcode和equals方法。
+
+import java.util.*;
+
+class Person{
+
+	private String name;
+	private int age;
+
+	public Person(String name,int age){
+		this.name=name;
+		this.age=age;
+	}
+
+	public int hashCode(){
+		System.out.println(this.name+"........hashcode");
+		return this.name.hashCode()+this.age*37;
+		//return 60;
+	}
+
+	public boolean equals(Object obj){
+		if(!(obj instanceof Person)){
+			return false;
+		}
+		
+		Person p=(Person)obj;
+		System.out.println(this.name+".......equals......"+p.name);
+		return this.name.equals(p.name) && this.age==p.age;
+	}
+
+	public String getName(){
+		return name;
+	}
+
+	public int getAge(){
+		return age;
+	}
+}
+
+
+class HashSetTest{
+	public static void main(String[] args) {
+		HashSet  hs=new HashSet();
+
+		hs.add(new Person("a1",11));
+		hs.add(new Person("a2",12));
+		hs.add(new Person("a3",13));
+		
+
+		sop(hs.contains(new Person("a1",11)));
+		//sop(hs.remove(new Person("a3",13)));
+
+		Iterator it=hs.iterator();
+
+		while(it.hasNext()){
+			Person p=(Person)it.next();
+
+			sop(p.getName()+"...."+p.getAge());
+		}
+	}
+
+	public static void sop(Object obj){
+		System.out.println(obj);
+	}
+}
+
+
+
+
+contains 的结果：
+a1........hashcode
+a2........hashcode
+a3........hashcode
+a1........hashcode
+a1.......equals......a1
+true
+a1....11
+a3....13
+a2....12
+
+
+remove的结果：
+a1........hashcode
+a2........hashcode
+a3........hashcode
+a3........hashcode
+a3.......equals......a3
+true
+a1....11
+a2....12
