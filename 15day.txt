@@ -369,3 +369,516 @@ class StrLenComparator implements Comparator{
 		
 	}	
 }
+
+
+
+
+
+
+6.泛型概述
+
+泛型：JDK1.5版本以后出现新特性，用于解决安全问题，是一个安全机制。
+
+好处：
+1.将运行时期出现问题ClassCastException，转移到了编译时期。
+	方便于程序员解决问题，让运行时期问题减少，安全。
+	
+2.避免了强制转换麻烦
+
+import java.util.*;
+
+class GenericDemo{
+
+	public static void main(String[] args){
+
+		ArrayList<String> al=new ArrayList<String>();
+
+		al.add("adb001");
+		al.add("adb132");
+		al.add("adb8321");
+		//al.add(4); //al.add(new Integer(4));
+
+		Iterator<String> it=al.iterator();
+
+		while(it.hasNext()){
+			String s=it.next();
+
+			System.out.println(s+":"+s.length());
+		}
+
+	}
+}
+
+
+
+7.泛型使用
+
+泛型格式：通过<>来下定义要操作的引用数据类型。
+
+在使用java提供的对象时，什么时候写泛型呢？
+通常在集合框架中很常见，只要见到<>就要定义泛型。
+
+其实<>就是有来接收类型的。
+
+当使用集合时，将集合中要存储的数据类型作为参数传递到<>中即可。
+
+
+import java.util.*;
+
+class GenericDemo2{
+
+	public static void main(String[] args){
+		TreeSet<String> ts=new TreeSet<String>(new LenComparator());
+		
+		ts.add("abcd");
+		ts.add("cc");
+		ts.add("cba");
+		ts.add("aaa");
+		ts.add("z");
+		ts.add("hahaha");
+		
+		Iterator<String> it=ts.iterator();
+
+		while(it.hasNext()){
+			System.out.println(it.next());
+		}
+
+	}
+}
+
+
+class LenComparator implements Comparator<String>{
+	public int compare(String o1,String o2){
+	    //这里把o1和o2有位置换了一下，这样可以倒序排序
+		int num= new Integer(o2.length()).compareTo(new Integer(o1.length()));
+		if(num==0){
+			return o2.compareTo(o1);
+		}
+		return num;
+	}
+}
+
+
+运行结果：
+hahaha
+abcd
+cba
+aaa
+cc
+z
+
+
+
+
+
+8.泛型类
+
+什么时候定义泛型类？
+当类中要操作的引用数据类型不确定的时候，
+早期定义Object来完成扩展。
+现在定义泛型来完成扩展。
+
+泛型的一个好处是可以将错误转移到编译时期发现。
+
+import java.util.*;
+
+class Worker{
+
+}
+
+class Student{
+
+}
+
+/*
+//泛型前做法
+class Tools{
+	private Object obj;
+
+	public void setObject(Object obj){
+		this.obj=obj;
+	} 
+
+	public Object getObject(){
+		return obj;
+	} 
+}
+*/
+
+//泛型类
+class Utils<QQ>{
+	private QQ q;
+	public void setObject(QQ q){
+		this.q=q;
+	}
+
+	public QQ getObject(){
+		return q;
+	}
+}
+
+
+class GenericDemo3{
+
+	public static void main(String[] args){
+		Utils<Worker> u=new Utils<Worker>();
+
+		u.setObject(new Worker());
+		Worker w=u.getObject(); //用泛型后可以不用强转了 Worker w=(Worker)u.getObject();
+		
+	/*
+		Tools t=new Tools();
+		t.setObject(new Student());
+		Worker w=(Worker)t.getObject();
+	*/
+	}
+}
+
+
+
+
+9.泛型方法
+
+泛型类定义的泛型，在整个类中有效。如果被方法使用，
+那么泛型类的对象明确要操作的具体类型后，所有要操作的类型就已经固定了。
+
+为了让不同方法可以操作不同类型，而且类型还不确定，
+那么可以将泛型定义在方法上。
+
+import java.util.*;
+
+/*
+class Demo<T>{
+
+	public void show(T t){
+		System.out.println("show:"+t);
+	}
+
+	public void print(T t){
+		System.out.println("print:"+t);
+	}
+}
+*/
+
+class Demo{
+
+	public <T> void show(T t){
+		System.out.println("show:"+t);
+	}
+
+	public <Q> void print(Q q){
+		System.out.println("print:"+q);
+	}
+}
+
+class GenericDemo4{
+
+	public static void main(String[] args){
+		Demo d=new Demo();
+
+		d.show("abcd");
+		d.show(new Integer(4));
+		d.print("heihei");
+
+	/*
+		Demo<String> d=new Demo<String>();
+
+		d.show("haha");
+		d.print(3);
+
+		Demo<Integer> d=new Demo<Integer>();
+
+		d.print(4);
+		d.show("abcd");
+	*/
+	}
+
+}
+
+结果：
+show:abcd
+show:4
+print:heihei
+
+
+
+
+10.静态方法泛型
+
+特殊之处：
+静态方法不可以访问类上定义的泛型。
+如果静态方法操作的应用数据类型不确定，可以将泛型定义在方法上。
+
+
+import java.util.*;
+
+
+class Demo<T>{
+
+	public void show(T t){
+		System.out.println("show:"+t);
+	}
+
+	public <Q> void print(Q q){
+		System.out.println("print:"+q);
+	}
+
+	public static <W> void method(W w){
+		System.out.println("method:"+w);
+	}
+}
+
+
+
+class GenericDemo5{
+
+	public static void main(String[] args){
+		Demo<String> d=new Demo<String>();
+		d.show("hahaha");
+		//d.show(5);
+		
+		d.print("heihei");
+		d.print(6);
+
+		d.method("aaaaaaaaaaaaaa");
+		d.method(5555555);
+
+	}
+
+}
+
+结果：
+show:hahaha
+print:heihei
+print:6
+method:aaaaaaaaaaaaaa
+method:5555555
+
+
+
+
+
+11.泛型接口
+
+import java.util.*;
+
+
+interface Inter<T>
+{
+	public void show(T t);
+}
+
+/*
+//在实现类已经确定类型的参数
+class InterImpl implements Inter<String>{
+	public void show(String s){
+		System.out.println(s);
+	}
+}
+*/
+//在实现类还不确定要什么类型的参数时
+class InterImpl<T> implements Inter<T>{
+	public void show(T t){
+		System.out.println(t);
+	}
+}
+class GenericDemo6{
+
+	public static void main(String[] args){
+		InterImpl<Integer> i=new InterImpl<Integer>();
+		i.show(7);
+
+		//InterImpl i=new InterImpl();
+		//i.show("hahaha");
+	}
+
+}
+
+
+
+
+
+12.泛型限定
+
+import java.util.*;
+
+class GenericDemo7{
+
+	public static void main(String[] args){
+	/*
+		ArrayList<String> al=new ArrayList<String>();
+
+		al.add("abc1");
+		al.add("abc2");
+		al.add("abc3");
+
+		ArrayList<Integer> al1=new ArrayList<Integer>();
+
+		al1.add(4);
+		al1.add(7);
+		al1.add(1);
+
+		printColl(al);
+		printColl(al1);
+	*/
+
+		ArrayList<Person> al=new ArrayList<Person>();
+		al.add(new Person("abc1"));
+		al.add(new Person("abc2"));
+		al.add(new Person("abc3"));
+		printColl(al);
+
+		ArrayList<Student> al1=new ArrayList<Student>();
+		al1.add(new Student("abc--1"));
+		al1.add(new Student("abc--2"));
+		al1.add(new Student("abc--3"));
+		printColl(al1);//ArrayList<Person> al=new ArrayList<Student>();
+
+	}
+
+	public static void printColl(ArrayList <? extends Person> al){  //ArrayList<String> al1=new ArrayList<Integer>();
+		Iterator <? extends Person>  it=al.iterator();
+
+		while(it.hasNext()){
+			System.out.println(it.next().getName());
+		}
+	}
+
+	/*
+	public static void printColl(ArrayList<?> al){  //ArrayList<String> al1=new ArrayList<Integer>();
+		Iterator<?>  it=al.iterator();
+
+		while(it.hasNext()){
+			System.out.println(it.next());
+		}
+	}
+	*/
+}
+
+
+class Person{
+	private String name;
+	Person(String name){
+		this.name=name;
+	}
+	public String getName(){
+		return name;
+	}
+}
+
+class Student extends Person{
+	
+	Student(String name){
+		super(name);
+	}
+}
+
+
+
+
+
+
+class Student implements Comparable<Person>{//<? super E>
+	public int compareTo(Person){
+		this.getName();
+	}
+}
+
+class Comp implements Comparator<Person>{
+	public int compare(Person s1,Person s2){
+		Person s1=new Student("abc1");
+		return s1.getName().compareTo(s2.getName());
+	}
+}
+
+TreeSet<Student>  ts=new TreeSet<Student>(new Comp())
+ts.add(new Student("abc1"));
+ts.add(new Student("abc2"));
+ts.add(new Student("abc3"));
+
+
+
+
+13.泛型限定2
+泛型限定用于泛型扩展用的
+
+下限：
+
+import java.util.*;
+
+class GenericDemo8{
+	public static void main(String[] args){
+
+		TreeSet<Student> ts=new TreeSet<Student>(new Comp());
+
+		ts.add(new Student("abc01"));
+		ts.add(new Student("abc02"));	
+		ts.add(new Student("abc03"));
+
+		Iterator<Student> it=ts.iterator();
+		while(it.hasNext()){
+			System.out.println(it.next().getName());
+		}
+
+
+
+
+		TreeSet<Worker> ts1=new TreeSet<Worker>(new Comp());
+
+		ts1.add(new Worker("wabc--01"));
+		ts1.add(new Worker("wabc--02"));
+		ts1.add(new Worker("wabc--03"));
+
+		Iterator<Worker> it1=ts1.iterator();
+		while(it1.hasNext()){
+			System.out.println(it1.next().getName());
+		}
+
+	}
+}
+
+class Comp implements Comparator<Person>{ //<? super E>  可以接收E或E的父类型
+	public int compare(Person p1,Person p2){
+		return p1.getName().compareTo(p2.getName());
+	}
+}
+
+/*
+这两比较器如果只指定当前类型的话，就就只能比较当前对象
+如果类型为Person则既可以接收Student又能接收Worker
+
+class StuComp implements Comparator<Student>{
+	public int compare(Student p1,Student p2){
+		return p1.getName().compareTo(p2.getName());
+	}
+}
+
+class WorkerComp implements Comparator<Worker>{
+	public int compare(Worker p1,Worker p2){
+		return p1.getName().compareTo(p2.getName());
+	}
+}
+*/
+
+class Person {
+	private String name;
+	Person(String name){
+		this.name=name;
+	}
+
+	public String getName(){
+		return name;
+	}
+}
+
+class Student extends Person{
+	Student(String name){
+		super(name);
+	}
+}
+
+class Worker extends Person{
+	Worker(String name){
+		super(name);
+	}
+}
