@@ -1,3 +1,3 @@
-#study java notes
+##java&git notes
 
 updating...
