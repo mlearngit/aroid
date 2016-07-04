@@ -1,4 +1,4 @@
-![java](logo.jpg)
+![java](logo.png)
 
 ##java&git notes
 
