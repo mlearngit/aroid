@@ -1,3 +1,0 @@
-##study java notes
-
-updating...
