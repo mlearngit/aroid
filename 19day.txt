@@ -1,0 +1,114 @@
+1.BufferedWriter
+
+
+import java.io.*;
+
+class BufferedWriterDemo{
+	public static void main(String[] args)throws IOException{
+	
+		//创建一个字符写入流对象。
+		FileWriter fw=new FileWriter("buf.txt");
+
+		//为了提高字符写入流效率，加入了缓冲技术。
+		//只要将需要被提高效率的流对象作为参数传递给缓冲区的构造函数即可。
+		BufferedWriter bufw=new BufferedWriter(fw);
+
+		for(int x=1; x<5; x++){
+			bufw.write("abcde"+x);
+			bufw.newLine();
+			bufw.flush();	
+		}
+		
+		//记住，只要用到缓冲区，就要记得刷新。
+		//bufw.flush();
+		
+		//其实关闭缓冲区，就是在关闭缓冲区中的流对象。
+		bufw.close();
+
+		
+	}
+}
+
+
+
+
+
+2.BufferedReader
+
+
+字符读取流缓冲区：
+该缓冲区提供了一个一次读一行的方法readLine，方便于对文本数据的获取。
+当返回null时，表示读到文件末尾。
+
+import java.io.*;
+
+class BufferedReaderDemo{
+	public static void main(String[] args)throws IOException{
+	
+		//创建一个读取流对象和文件相关联
+		FileReader fr=new FileReader("buf.txt");
+
+		//为了提高效率，加入缓冲技术，将字符读取流对象传递给缓冲对象构造函数
+		BufferedReader bufr=new BufferedReader(fr);
+
+		String line=null;
+
+		while((line=bufr.readLine())!=null){
+			System.out.println(line);
+		}
+
+		bufr.close();
+	}
+}
+
+
+
+
+3.通过缓冲区复制文本文件
+
+
+字符读取流缓冲区：
+该缓冲区提供了一个一次读一行的方法readLine，方便于对文本数据的获取。
+当返回null时，表示读到文件末尾。
+
+readLine方法返回的时候只返回回车符之前的数据内容。并不返回回车符。
+
+import java.io.*;
+
+class CopyTextByBuf{
+	public static void main(String[] args){
+		BufferedWriter bfw=null;
+		BufferedReader bfr=null;
+
+		try{
+			bfr=new BufferedReader(new FileReader("FileReaderDemo8.java"));
+			bfw=new BufferedWriter(new FileWriter("g:\\filereader_copy.txt"));
+
+			String str=null;
+			while((str=bfr.readLine())!=null){
+				bfw.write(str);
+				bfw.newLine();
+				bfw.flush();
+			}
+
+		}catch(IOException e){
+			throw new RuntimeException("du qu file");
+		}
+		finally{
+			try{
+				if(bfr!=null){
+					bfr.close();
+				}
+			}catch(IOException e){
+
+			}
+			try{
+				if(bfw!=null){
+					bfw.close();
+				}
+			}catch(IOException e){
+				
+			}
+		}
+	}
+}
