@@ -1,0 +1,141 @@
+File概述
+
+import java.io.*;
+
+class FileDemo{
+	public static void main(String[] args){
+		consMethod();
+	}
+
+	
+	//创建File对象 
+	public static void consMethod(){
+	
+		//将a.txt封装成file对象。可以将已有的和未出现的文件或者文件夹封装成对象。
+		File f1=new File("aj.txt");
+
+		File f2=new File("c:\\abc","b.txt");
+
+		File d=new File("c:\\abc");
+		File f3=new File(d,"c.txt");
+
+		
+		//打印出路径（封装的是相对路径就打印相对路径，封装绝对路径就打印绝对路径）
+		sop("f1:"+f1);
+		sop("f2:"+f2);
+		sop("f3:"+f3);
+
+		File f4=new File("c:"+File.separator+"abc"+File.separator+"zzz"+File.separator+"avf.txt");
+		sop(f4);
+
+
+	}
+
+	public static void sop(Object obj){
+		System.out.println(obj);
+	}
+}
+
+
+result:
+f1:aj.txt
+f2:c:\abc\b.txt
+f3:c:\abc\c.txt
+c:\abc\zzz\avf.txt
+
+
+
+
+
+2.File对象功能-创建和删除
+
+File类常见方法：
+1.创建。
+	boolean createNewFile():在指定位置创建文件，如果该文件已经存在，则不创建，返回false。
+					和输出流不一样，输出流对象一建立就创建文件，而且文件已经存在，会覆盖。
+					
+2.删除。
+	boolean delete():删除失败返回false。
+	void deleteOnExit();在程序退出时删除指定文件。（当创建文件后出现异常时，不能删除文件下，可以用这方法）
+
+
+public static void method_1()throws IOException{
+		File f=new File("file0807.txt");
+		f.deleteOnExit();
+		//sop("create:"+f.createNewFile());
+		sop("delete:"+f.delete());
+	}
+
+
+	
+	
+3.File对象功能-判断
+
+
+创建：
+boolean mkdir():创建文件夹（目录）、【只能创建一级文件夹】
+boolean mkdirs():创建多级文件夹
+
+
+判断：
+isFile()
+isDirectory()
+isHidden()  判断文件是否隐藏
+isAbsolute  判断是否是绝对路径（即使文件并不存在）
+
+public static void method_2()throws IOException{
+		File f=new File("FileDemo.java");
+
+		//sop("exists:"+f.exists());
+		//sop("execute:"+f.canExecute());
+
+		//File dir=new File("abc\\kkk\\ee\\tttt\\kada");
+		//sop("mkdir:"+dir.mkdirs());
+	}
+	
+	
+	
+	public static void method_3()throws IOException{
+		File f=new File("file.txt");
+
+		//f.createNewFile();
+		f.mkdir();
+
+		
+		//记住:在判断文件对象是否是文件或者目录时，必须要先判断该文件对象封装的内容是否存在
+		//通过exists判断
+		sop("dir:"+f.isDirectory());
+		sop("file:"+f.isFile());
+
+
+		File f1=new File("e:\\learnjava\\vvvv.txt");
+		sop("isAbsolute:"+f1.isAbsolute());
+	}
+	
+	
+	
+	
+
+	
+4.File对象功能-获取
+
+
+	public static void method_4()throws IOException{
+		File f=new File("file.txt");
+
+		sop("path:"+f.getPath());//这个路径的返回值由对象里的内容绝对，内容是相对就返回相对路径
+								//内容是绝对就返回绝对路径.
+		sop("abspath:"+f.getAbsolutePath());//返回绝对路径。
+		sop("parent:"+f.getParent());//该方法返回的是绝对路径中的父目录。如果获取的是相对路径，则返回null。
+									//如果相对路径中有上一层目录，那么该目录就是返回结果
+
+	}
+	
+	
+	
+	public static void method_5(){
+		File f1=new File("g:\\Ticket.txt");
+		File f2=new File("d:\\uuuuuuuuuuuuuuu.txt");
+
+		sop("renameTo"+f1.renameTo(f2)); //覆盖功能（步骤：删除原文件+重新创建=覆盖）
+	}
