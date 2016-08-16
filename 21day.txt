@@ -1,0 +1,149 @@
+1.IO流（对象的序列化）
+
+注意：
+1.在堆内存中的对象能够被序列化
+2.被static修饰的成员不会被序列化（因为静态都存在于方法区）
+3.要想某个非静态的成员不被序列化，需要在其前加上关键字：transient
+
+import java.io.*;
+
+class ObjectStreamDemo{
+	public static void main(String[] rgs)throws Exception{
+		writeObj();
+	}
+
+
+	public static void readObj()throws Exception{
+		ObjectInputStream  ois=new  ObjectInputStream(new FileInputStream("obj.txt"));
+
+		Person  p=(Person)ois.readObject();
+
+		System.out.println(p);
+
+		ois.close();
+	}
+
+	public static void writeObj()throws IOException{
+		ObjectOutputStream  oos=new ObjectOutputStream(new FileOutputStream("obj.txt"));
+		oos.writeObject(new Person("lisi",39));
+		oos.close();
+	}
+}
+
+========================
+
+import java.io.*;
+
+class Person implements Serializable{
+
+	public static final long serialVersionUID = 42L;
+
+	private String name;
+	transient int age;
+	Person(String name,int age){
+		this.name=name;
+		this.age=age;
+	}
+
+	public String toString(){
+		return name+":"+age;
+	}
+}
+
+
+
+
+
+
+2.IO流（管道流）
+1.之前的流在读取和写入时都有一个中转站，比如读取流把数据读进数组，再由写入流来操作
+2.而管道流可以直接一边读一边写。只要把两要管道对接上就行。
+3.通常情况下，管道流分别放到不同线程中去执行（不建议两对象使用单线程）
+4.read()方法当没有读取到数据时就处于等待状态。
+5.集合中涉及到io的是Properties;而io中涉及到多线程的是管道流。
+
+
+import java.io.*;
+
+class Read implements Runnable{
+	private PipedInputStream in;
+	Read(PipedInputStream in){
+		this.in=in;
+	}
+
+	public void run(){
+		try{	
+			byte[] buf=new byte[1024];
+
+			System.out.println("读取前...没有数据阻塞");
+
+			int len=in.read(buf);
+
+			System.out.println("读到数据...阻塞结束");
+
+
+			String s=new String(buf,0,len);
+			System.out.println(s);
+			in.close();
+		}catch(IOException e){
+			throw new RuntimeException("read fail !");
+		}
+
+	}
+}
+
+
+
+class Write implements Runnable{
+	private PipedOutputStream out;
+	Write(PipedOutputStream out){
+		this.out=out;
+	}
+
+	public void run(){
+		try{	
+
+			Thread.sleep(6000);
+			out.write("piped  lai la".getBytes());
+			out.close();
+		}catch(IOException e){
+			throw new RuntimeException("write fail !");
+		}
+
+	}
+}
+
+
+class PipedStreamDemo{
+	public static void main(String[] args)throws IOException{
+		PipedInputStream   in=new PipedInputStream();
+		PipedOutputStream  out=new PipedOutputStream();
+		in.connect(out);
+		Read  r=new Read(in);
+		Write w=new Write(out);
+		new Thread(r).start();
+		new Thread(w).start();
+	}
+}
+
+
+
+
+
+
+
+3.IO流（RandomAccessFile）
+
+RandomAccessFile）
+该类不算是io体系中子类。
+面是直接继承至Object。
+
+但是它是IO包中成员，因为它具备读和写功能。
+内部封装了一个数组，而且通过指针对数组的元素进行操作。
+可以通过getFilePointer获取指针位置，
+同时可以通过seek改变指针的位置。
+
+
+其实完成读写的原理 就是内部封装了字节输入流和输出流。
+
+通过构造函数可以看出，该类只能操作文件。

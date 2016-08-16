@@ -727,7 +727,7 @@ class SequenceDemo{
 
 
 
-IO流（切割文件）
+17.IO流（切割文件）
 
 
 import java.io.*;
