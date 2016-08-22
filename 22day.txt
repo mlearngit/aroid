@@ -613,3 +613,197 @@ class MyWindowDemo{
 
 
 
+
+
+
+
+11.GUI(菜单)
+
+
+import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
+
+class MyMenuDemo{
+	private Frame f;
+	private MenuBar mb;
+	private Menu m,subMenu;
+	private MenuItem closeItem,subItem;
+
+	MyMenuDemo(){
+		init();
+	}
+
+	public void init(){
+		f=new Frame("my window");
+		f.setBounds(300,100,500,600);
+		f.setLayout(new FlowLayout());
+
+		mb=new MenuBar();
+
+		m=new Menu("File");
+
+		subMenu=new Menu("subMenu");
+
+
+
+		//subItem=new Menu("subItem");
+		//closeItem=new Menu("exit");
+        subItem=new MenuItem("subItem");
+		closeItem=new MenuItem("exit");
+		
+
+		subMenu.add(subItem);
+
+		m.add(subMenu);
+		m.add(closeItem);
+		mb.add(m);
+
+		f.setMenuBar(mb);
+
+		myEvent();
+
+		f.setVisible(true);
+	}
+
+	private void myEvent(){
+
+		f.addWindowListener(new WindowAdapter(){
+			public void windowClosing(WindowEvent e){
+				System.exit(0);
+			}
+		});
+
+
+		closeItem.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				System.exit(0);
+			}
+		});
+
+		}
+
+
+	public static void main(String[] args){
+		new MyMenuDemo();
+	}
+}
+
+
+
+
+
+
+12.GUI（练习-打开文件）
+
+import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
+
+class MyMenuDemo{
+	private Frame f;
+	private MenuBar bar;
+	private TextArea ta;
+	private Menu fileMenu;
+	private MenuItem openItem,saveItem,closeItem;
+
+	private FileDialog openDia,saveDia;
+
+	MyMenuDemo(){
+		init();
+	}
+
+	public void init(){
+		f=new Frame("my window");
+		f.setBounds(300,100,650,600);
+		//f.setLayout(new BorderLayout());
+
+		bar=new MenuBar();
+
+		ta=new TextArea();
+
+		fileMenu=new Menu("File");
+
+
+		openItem=new MenuItem("open");
+		saveItem=new MenuItem("save");
+		closeItem=new MenuItem("exit");
+
+
+		fileMenu.add(openItem);
+		fileMenu.add(saveItem);
+		fileMenu.add(closeItem);
+		bar.add(fileMenu);
+
+		f.setMenuBar(bar);
+
+
+		openDia=new FileDialog(f,"open",FileDialog.LOAD);
+		saveDia=new FileDialog(f,"save",FileDialog.SAVE);
+
+		f.add(ta);
+		myEvent();
+
+		f.setVisible(true);
+	}
+
+	private void myEvent(){
+
+
+		openItem.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				openDia.setVisible(true);
+
+				String dirPath=openDia.getDirectory();
+				String fileName=openDia.getFile();
+				System.out.println(dirPath+"....."+fileName);
+				if(dirPath==null || fileName==null){
+					return ;
+				}
+				ta.setText("");
+
+				File file=new File(dirPath,fileName);
+
+				try{
+					BufferedReader bufr=new BufferedReader(new FileReader(file));
+
+					String line=null;
+
+					while((line=bufr.readLine())!=null){
+						ta.append(line+"\r\n");
+					}
+
+					bufr.close();
+				}catch(IOException ex){
+					throw new RuntimeException("read fai l");
+
+				}
+			}
+		});
+
+
+		f.addWindowListener(new WindowAdapter(){
+			public void windowClosing(WindowEvent e){
+				System.exit(0);
+			}
+		});
+
+
+		closeItem.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				System.exit(0);
+			}
+		});
+
+		}
+
+
+	public static void main(String[] args){
+		new MyMenuDemo();
+	}
+}
+
+
+
+
+12.GUI（保存文件）
