@@ -695,7 +695,7 @@ class MyMenuDemo{
 
 
 12.GUI（练习-打开文件）
-```JAVA
+
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -803,7 +803,6 @@ class MyMenuDemo{
 	}
 }
 
-```
 
 
 12.GUI（保存文件）
