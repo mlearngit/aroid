@@ -1,0 +1,238 @@
+1.网络编程（TCP-上传图片）
+
+需求：上传图片
+
+
+客户端：
+1.建立服务端点
+2.读取客户端已有的图片数据。
+3.通过socket输出流将数据发给服务端。
+4.读取服务端反馈信息。
+5.关闭。
+
+
+注意，在客户端的循环中当判断-1结束后，而里面的out.write()把最后的数据发过去时并没有带结束标记，
+导致服务端那边不能判断是否到-1了，因此服务端那边的循环到最后并不能结束，
+所以需要通过shutdownOutput()告诉服务端数据已写完。
+
+import java.io.*;
+import java.net.*;
+
+class PicClient{
+	public static void main(String[] args)throws Exception{
+		Socket s=new Socket("192.168.1.103",10007);
+
+		FileInputStream fis=new FileInputStream("C:\\Users\\lili\\Pictures\\Camera Roll\\1.jpg");
+
+		OutputStream out=s.getOutputStream();
+
+		byte[] buf=new byte[1024];
+
+		int len=0;
+
+		while((len=fis.read(buf))!=-1){
+			out.write(buf,0,len);  
+		}
+
+		s.shutdownOutput();//告诉服务端数据已写完
+
+
+		InputStream in=s.getInputStream();
+
+		byte[] by=new byte[1024];
+
+		int num=in.read(by);
+		System.out.println(new String(by,0,num));
+
+		fis.close();
+		s.close();
+	}
+}
+
+/*
+服务端
+*/
+
+class PicServer{
+	public static void main(String[] args)throws Exception{
+		ServerSocket ss=new ServerSocket(10007);
+
+		Socket s=ss.accept();
+
+		InputStream in=s.getInputStream();
+
+		FileOutputStream fos=new FileOutputStream("server.jpg");
+
+		byte[] buf=new byte[1024];
+
+		int len=0;
+
+		while((len=in.read(buf))!=-1){
+			fos.write(buf,0,len);
+		}
+
+
+		OutputStream out=s.getOutputStream();
+
+		out.write("upload success".getBytes());
+
+		fos.close();
+		s.close();
+		ss.close();
+	}
+}
+
+
+
+
+
+
+
+
+2.网络编程（TCP-客户端并发上传图片）
+
+
+
+import java.io.*;
+import java.net.*;
+
+class PicClient{
+	public static void main(String[] args)throws Exception{
+
+		if(args.length!=1){
+			System.out.println("please choose a jpg picture");
+			return;
+		}
+
+		File file=new File(args[0]);
+		if(!(file.exists() && file.isFile())){
+			System.out.println("this file maybe not exists or not file");
+			return;
+		}
+
+		if(!file.getName().endsWith(".jpg")){
+			System.out.println("picture style is error,please choose again");
+			return;
+		}
+
+		if(file.length()>1024*1024*5){
+			System.out.println("file is so big");
+			return;
+		}
+
+
+
+		Socket s=new Socket("192.168.1.103",10008);
+
+		FileInputStream fis=new FileInputStream(file);
+
+		OutputStream out=s.getOutputStream();
+
+		byte[] buf=new byte[1024];
+
+		int len=0;
+
+		while((len=fis.read(buf))!=-1){
+			out.write(buf,0,len);
+		}
+
+		s.shutdownOutput();
+
+
+		InputStream in=s.getInputStream();
+
+		byte[] by=new byte[1024];
+
+		int num=in.read(by);
+		System.out.println(new String(by,0,num));
+
+		fis.close();
+		s.close();
+	}
+}
+
+
+class PicThread implements Runnable{
+	private Socket s;
+	PicThread(Socket s){
+		this.s=s;
+	}
+
+
+	public void run(){
+
+		int count=1;
+		String ip=s.getInetAddress().getHostAddress();
+
+		try{
+			
+			System.out.println(ip+".....connected");
+
+			InputStream in=s.getInputStream();
+
+
+			File file=new File(ip+"("+(count)+")"+".jpg");
+
+			while(file.exists()){
+				file=new File(ip+"("+(count++)+")"+".jpg");
+			}
+
+			FileOutputStream fos=new FileOutputStream(file);
+
+			byte[] buf=new byte[1024];
+
+			int len=0;
+
+			while((len=in.read(buf))!=-1){
+				fos.write(buf,0,len);
+			}
+
+
+			OutputStream out=s.getOutputStream();
+
+			out.write("upload success".getBytes());
+
+			fos.close();
+			s.close();
+		
+
+		}catch(Exception e){
+			throw new RuntimeException(ip+"upload fail!!");
+		}
+		
+	}
+}
+
+
+
+服务端
+
+这个服务端有个局限性。当A客户端连接上以后，被服务端获取到，服务端执行具体流程。
+这时B客户端连接，只有等待。
+因为服务端还没有处理完A客户端的请求，没有循环回来执行下次accept方法。所以
+暂时获取不到B客户端对象。
+
+那么为了可以让多个客户端同时并发访问服务端。
+那么服务端最好就是将每个客户端封装到一个单独的线程中，这样就要以同时处理多个客户端请求。
+
+
+如何定义线程呢？
+
+只要明确了每一个客户端要在服务端执行的代码即可。将该代码存入run方法中。
+
+
+
+class PicServer{
+	public static void main(String[] args)throws Exception{
+		ServerSocket ss=new ServerSocket(10008);
+
+		while(true){
+
+			Socket s=ss.accept();
+			System.out.println(s);
+			new Thread(new PicThread(s)).start();
+		}
+
+		//	ss.close();
+	}
+}
