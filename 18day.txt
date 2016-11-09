@@ -169,7 +169,7 @@ public class CalendarDemo2 {
 	public static void main(String[] args) {
 
 		Calendar c=Calendar.getInstance();
-		m 
+		
 		//c.set(2017, 2, 23);
 		
 		c.add(Calendar.DAY_OF_MONTH, -18);
@@ -480,6 +480,7 @@ class FileReaderDemo{
 
 		int num=0;
 
+		//一执行fr.read(buf),则将Datedemo.java文件一次性全部读取到数组里面
 		while((num=fr.read(buf))!=-1){
 			System.out.println(new String(buf,0,num));
 		}

@@ -74,7 +74,7 @@ class CollectionsDemo1{
 
 		Collections.sort(list);
 		sop(list);
-		String max=Collections.max(list/*,new StrLenComparator()*
+		String max=Collections.max(list/*,new StrLenComparator()*/)
 		sop("max="+max);
     }
 

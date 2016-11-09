@@ -736,7 +736,7 @@ class GenericDemo7{
 
 	}
 
-	public static void printColl(ArrayList <? extends Person> al){  //ArrayList<String> al1=new ArrayList<Integer>();
+	public static void printColl(ArrayList <? extends Person> al){  //ArrayList<Person> al1=new ArrayList<Person>();
 		Iterator <? extends Person>  it=al.iterator();
 
 		while(it.hasNext()){

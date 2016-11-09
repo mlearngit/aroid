@@ -25,7 +25,7 @@
 import java.util.*;
 
 class CollectionDemo{
-	pulic static void main(String[] args){
+	public static void main(String[] args){
 		
 	}
 	
@@ -84,9 +84,9 @@ class CollectionDemo{
 		
 		//1.添加元素。
 		a1.add("java01");//add(Object obj);
-		a1.add("java02")
-		a1.add("java03")
-		a1.add("java04")
+		a1.add("java02");
+		a1.add("java03");
+		a1.add("java04");
 		
 		Iterator it=al.iterator();//获取迭代器，用于取出集合中的元素。
 		while(it.hasNext()){
