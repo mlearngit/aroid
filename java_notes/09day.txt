@@ -1,0 +1,730 @@
+1.内部类
+
+
+/**
+内部类的访问规则：
+1.内部类可能直接访问外部类中的成员，包括私有。
+  之所以可以直接访问外部类中的成员，是因为内部类中持有一个外部类的引用，格式：外部类名.this
+2.外部类要访问内部类，必须建立内部类对象
+
+3.当内部类在外部类的成员位置时可以被private修饰
+
+
+3.创建内部类的好处：如果一个类要访问另一个类中的成员需要创建其对象，但是如果这个类在其内的内部(内部类)，就可以直接访问
+
+*/
+
+class Outer{
+  private int x=3;
+  
+  private class Inner{
+      // 	int x=4;
+      public void function(){
+		//  int x=6;
+	    System.out.println("Inner: "+x);  //这句话中，打印结果是3,其实的调用方式为Outer.this.x
+	  }
+  }
+  
+  public void method(){
+    Inner in=new Inner();
+     in.function();
+  }
+}
+
+public class InnerDemo{
+   public static void main(String[] args){
+       Outer out=new Outer();
+	   out.method();
+	 
+	 //直接访问内部内中的成员，下面的写法基本用不着
+	// Outer.Inner in=new Outer().new Inner();
+	  //in.function();
+   }
+}
+
+
+
+
+2.静态内部类
+
+访问格式：
+1.当内部类定义在外部类的成员位置上，而且非私有，可以在外部其它类中(如main方法)。可以直接建立内部类对象
+格式  
+    外部类名.内部类名    变量名 = 外部类对象.内部类对象;
+	Outer.Inner in out=new Outer.new Inner();
+	
+	
+2.当内部类在成员位置上，就可以被成员修饰符所修饰。
+  比如：private ：将内部类在外部类中进行封装。
+        static ：内部类就具备static特性。
+		当内部类被static修饰后，只能直接访问外部类中的static成员，出现了访问局限。
+		
+		在外部其它类中，如何直接访问static内部类的非静态成员呢？
+		new outer.Inner().function();
+		
+		在外部其它类中，如何直接访问static内部类的静态成员呢？
+		Outer.Inner.function();
+		
+	注意：当内部类中定义了静态成员，该内部类必须是static的。
+	      当外部类中的静态方法访问内部类时，内部类也必须是static的。
+		  
+		  
+class Outer{
+  private int x=3;
+  
+  static class Inner{
+      
+      public void function(){
+		
+	    System.out.println("Inner: "+x);  //这句话中，打印结果是3,其实的调用方式为Outer.this.x
+	  }
+  }
+  
+}
+
+public class InnerDemo{
+   public static void main(String[] args){
+       Outer.Inner in out=new Outer.new Inner();
+	   out.function();
+	 
+	 //直接访问内部内中的成员，下面的写法基本用不着
+	// Outer.Inner in=new Outer().new Inner();
+	  //in.function();
+   }
+}		  
+		  
+		  
+		  
+3.内部类定义原则：		  
+当描述事物时，事物内部还有事物，该事物内内部类来描述。
+因为内部事务在使用外部事物内容
+当一个类需要直接访问另一个类的成员时就可以把这个类写到里面去，然后将该类封装起来，并提供其它外部内的访问方法
+class Body{
+
+   private class XingZang{
+	}
+	
+   public void show(){
+       new XingZang()
+   }
+}
+
+
+
+4.匿名内部类
+
+透过以下两个demo总结：
+内部类定义在局部时，
+1.不可以被成员修饰符所修饰，即不可以在function加static ，如果加了对应的类也会静态，这不符合语法
+2.可以直接访问外部类中的成员，因为还持有外部类中的引用，
+   但是不可以访问它所在的局部中的变量，只能访问被final修饰的局部变量
+
+demo1:
+class Outer{
+  int x=3;
+  
+  void method(){
+      //new Inner().function();    此实例化只能放到Inner内部类的下方，因为此类还未被加载到就实例名时会提示找不着类
+     class Inner{
+	    void function(){
+		   System.out.println(Outer.this.x);
+		}
+	      
+	}
+	
+	    new Inner().function();	
+  }
+}
+
+
+class InnerClassDemo3{
+   public static void main(String[] args){
+       new Outer().method();
+   }
+}
+
+
+
+demo2:
+class Outer{
+  int x=3;
+  
+  void method(){
+  
+      final int y=4;
+	  
+     class Inner{
+	   
+	    void function(){
+		   System.out.println(y);
+		}
+	      
+	}
+	
+	    new Inner().function();	
+  }
+}
+
+
+class InnerClassDemo3{
+   public static void main(String[] args){
+       new Outer().method();
+   }
+}
+
+
+
+
+继续匿名内部类
+
+1.匿名内部类其实就是内部名的简写格式。
+2.定义匿名内部类的前提：
+     内部类必须是继承一个类或者实现接口
+3.匿名内部类的格式：new 父类或者接口(){定义子类内容}
+4.其实匿名内部类就是一个匿名子类对象，而且这个对象有点胖，可以理解为带内容的对象。
+5.匿名内部类中定义的方法最好不要超过3个。
+abstract class 	AbsDemo{
+  abstract void show();
+}
+
+
+class Outer{
+  int x=3;
+  
+ /** 
+  class Inner extends AbsDemo{
+	   
+	    public void show(){
+		   System.out.println("show="+x);
+		}
+	}
+  */	
+  
+  
+	public void function(){
+	   //new Inner().show();
+	   
+	   
+	   new AbsDemo(){
+	   
+	     void show("x"=x){
+		   
+		 }
+	   }.show();
+	   
+	}
+
+}
+
+
+class InnerClassDemo3{
+   public static void main(String[] args){
+       new Outer().function();
+   }
+}
+
+
+
+
+以下是一个练习：
+一个非匿名的形式
+interface Inter{
+   void method();
+}
+
+class Test{
+ 
+   static class Inner implements Inter{
+      public void method(){
+	    System.out.println("method run");
+	  }
+   }
+   
+   static Inter function(){
+       return new Inner();
+   }
+}
+
+
+class InnerClassTest{
+  public static void main(String[] args){
+    Test.function().method();
+  }
+}
+
+
+
+一个匿名的形式:
+
+interface Inter{
+   void method();
+}
+
+class Test{
+ 
+ 
+   static Inter function(){
+	   
+       return new Inter(){
+		   public void method(){
+		     System.out.println("method run..");
+	  }
+	   };
+   }
+}
+
+
+class InnerClassTest{
+  public static void main(String[] args){
+     //Test.function(): Test类中有一个静态的方法function
+	 //.method();function这个方法运算后的结果是一个对象。而且是一个Inter类型对象。
+	 //因为只有一个Inter类型的对象，才可以调用method方法。
+  
+    Test.function().method();
+	
+	// 以上的写法可以改成如下
+	   Inter in=Test.function();
+	   in.method();
+  }
+}
+
+另个还有一种情况，如：
+
+在show方法里面需要传入一个匿名对象
+show(new Inter(){
+  public void method(){
+     System.out.println("method show run");
+  }
+});
+
+
+public static void show(Inter in){
+     in.method();
+}
+
+
+
+
+异常概述
+
+异常：就是程序运行时出现不正常情况。
+异常由来：问题也是现实生活中一个具体事物，也可以通过java的类形式进行描述。并封装成对象。
+              其实就是java对不正常情况进行描述后的对象体现。
+对于问题的划分：两种：一种是严重的问题，一种是非严重的问题。
+对于严重的，java通过Error类进行描述。
+         对于Error一般不编写针对性的代码对其进行处理。
+对于非严重的，java通过Exception类进行描述。
+        对于Exception可以使用针对性的处理方式进行处理。
+无论Error还是Exception都具有一些共性内容。
+比如：不正常情况的信息，引发原因等。
+
+Throwable
+    |--Error
+	|--Exception
+
+
+例子：
+class Demo{
+  int div(int a,int b){
+     return a/b;
+  }
+}
+
+class ExceptionDemo{
+   public static void main(String[] args){
+      Demo d=new Demo();
+	  int x=d.div(4,0);
+	  System.out.println("x="+x);
+	  
+	  System.out.println("over");
+   }
+}
+
+
+2.异常的处理(try-catch)
+java提供了特有的语句进行处理。
+try{
+  需要被检测的代码；
+}catch(异常类  变量){
+   处理异常的代码:(处理方式)
+}
+finally{
+   一定会执行的语句；
+}
+
+3.对捕获到异常对象进行常见方法操作。
+  String getMessage();
+  
+  
+class Demo{
+  int div(int a,int b){
+     return a/b;             //注意：当除数为0时，会发生ArithmeticException异常
+  }
+}
+
+class ExceptionDemo{
+   public static void main(String[] args){
+      Demo d=new Demo();
+	  try{
+	  
+	    int x=d.div(4,0);
+		System.out.println("x="+x);
+		
+	  }catch(Exception e){   //Exception e=new ArithmeticException();
+	  
+	    System.out.println("除零啦");
+		System.out.println(e.getMessage());  //by zero;
+		System.out.println(e.toString());    //异常名称：异常信息
+		
+		e.printStackTrace();  //异常名称，异常信息，异常出现的位置
+		//其实jvm默认的异常处理机制，就是在调用printStackTrace方法。打印异常的堆栈的跟踪信息。
+	  }
+	  
+	 
+	  
+	  System.out.println("over");
+   }
+}
+
+
+3.异常的声明throws
+
+在函数上声明异常。
+便于提高安全性，让调用者进行处理，不处理编译失败。
+
+class Demo{
+  int div(int a,int b)throws Exception //在功能上通过throws的关键字声明了该功能有可能会出现问题。
+  {
+     return a/b;
+  }
+}
+
+class ExceptionDemo{
+   public static void main(String[] args){
+      Demo d=new Demo();
+	  try{
+	    int x=d.div(4,0);
+	    System.out.println("x="+x);
+	  }
+	  catch(Exception e)
+	  {
+	     System.out.println(e.toString());
+	  }
+	  
+	  
+	  System.out.println("over");
+   }
+}
+
+
+
+4.多异常处理
+
+1.声明异常时，建议声明更为具体的异常，这样处理的可以更具体。
+2.对方声明几个异常，就对应有几个catch块，不要定义多余的catch块。
+  如果多个catch块中的异常出现继承关系，父类异常catch块放在最下面。
+  
+建立在进行catch处理时，catch中一定要定义具体处理方式。
+不要简单定义一句e.printStackTrace();
+也不要简单的就书写一条输出语句。（最好是把报出的异常信息用文件的形式保存起来）
+
+下面的下例子中，由于声明了两个异常类，那么当出现其中一种异常的时候，catch里面就会捕获该异常。但是不可能
+同时捕获两个异常信息，因为在第一个异常出现之后程序已经停止，不再执行后面的语句，因此也没有遇到后面的异常。
+class Demo{
+  int div(int a,int b) throws ArithmeticException,ArrayIndexOutOfBoundsException
+  {
+    int[] arr=new int[a];
+	System.out.println(arr[4]);
+	return a/b;
+  }
+}
+
+class ExceptionDemo{
+  public static void main(String[] args){
+    Demo d=new Demo();
+	try
+	{
+	  int x=d.div(5,0);
+	  System.out.println("x="+x);
+	}
+	catch(ArithmeticException e)
+	{
+        System.out.println(e.toString());
+		System.out.println("bei zero");
+	}
+	catch(ArrayIndexOutOfBoundsException e)
+	{
+        System.out.println(e.toString());
+		System.out.println("jiao biao yue jie la");
+	}
+	catch(Exception e)
+	{
+	     System.out.println("haha:"+e.toString());
+	}	
+  }
+}
+
+
+
+
+
+5.自定义异常
+
+因为项目中会出现特有的问题，
+而这些问题并未被java所描述并封装对象。
+所以对于这些特有的问题可以按照java的对问题封装的思想，
+将特有的问题进行自定义的异常封装。
+
+自定义异常
+
+需求：在程序中，对于除数是-1，也视为是错误的是无法进行运算的。
+那么就需要对这个问题进行自定义的描述。
+
+当在函数内部出现throw抛出异常对象，那么就必须要给对应的处理动作。
+要么在内部try catch处理。
+要么在函数上声明让调用者处理。
+
+一般情况下，函数内出现异常，函数上需要声明
+
+发现打印的结果中只有异常的名称，却没有异常信息。
+因为自定义的异常并未定义信息。
+
+如何定义异常信息呢？
+因为父类中已经把异常信息的操作都完成了。
+所以子类只要在构造时，将异常信息传递给父类通过super语句。
+那么就可以直接通过getMessage方法获取自定义的异常信息。
+
+自定义异常：
+必须是自定义类继承Exception。
+
+继承Exception的原因：
+异常体系有一个特点：因为异常类和异常对象都被抛出。
+他们都具备可抛性，这个可抛性是Throwable这个体系中独有特点。
+
+重要：Exception以及其子类如果在函数内throw时，则该函数也需要声明，则否编译失败； 而如果是throw RunTimeExcepton或其子类则可以不用声明
+
+class FushuException extends Exception{
+	int b;
+	
+	FushuException(String message,int b){
+		super(message);
+		this.b=b;
+		
+	}
+	public int getValue(){
+		return b;
+	}
+	
+	
+}
+
+class Demo{
+    int div(int a,int b) throws FushuException
+	{
+		if(b<0){
+		    // 以下语句是由于此异常对象是我们自己定义出来的，java里面本身没有该异常，如果有它自己会识别，因此我们需要手动抛出自定义的对象
+			throw new FushuException("lalalalalal",b);   
+		}
+      return a/b;
+   
+   }
+}
+
+public class ExceptionDemo2{
+  public static void main(String[] args){
+     Demo d=new Demo();
+	 try{
+		 
+	 int x=d.div(5,-1);
+	 
+	 System.out.println("x="+x);
+	 }
+	 catch(FushuException e){
+		System.out.println("fushu---:"+e.toString());
+		System.out.println("chu xian fushu  le");
+		System.out.println("get b value:"+e.getValue());
+	 }
+	 System.out.println("over");
+  }
+}
+
+
+
+6.throw和throws的区别
+
+
+throws使用在函数上。
+throw使用在函数内。
+
+throws后面跟的异常类，可以跟多个，用逗号隔开。
+throw后跟的异常对象。
+
+
+
+
+7.RunTimeException
+
+
+Exception中有一个特殊的子类异常RunTimeException运行时异常。
+如果在函数内抛出该异常，函数上可以不用声明，编译一样通过。
+如果在函数上声明了该异常，调用者可以不用进行处理。编译一样通过；
+
+之所以不用在函数声明，是因为不需要让调用者处理。
+当该异常发生，希望程序停止。因为在运行时，出现了无法继续运算的情况，希望停止程序后，对代码进行修正。
+
+自定义异常时：如果该异常的发生，无法在继续进行运算，
+就让自定义异常继承RunTimeException。
+
+对于异常分两种：
+1.编译时被检测的异常(Exception)。
+2.编译时不被检测的异常（运行时异常，RunTimeException以及其子类）
+
+
+
+class FushuException extends Exception{
+
+   FushuException(String msg){
+    super(msg);
+   }
+}
+
+class Demo{
+   int div(int a,int b) throws FushuException
+   {
+     if(b<0){
+	   throw new FushuException("chu xian fu shu le"); //如果抛出该对象异常，则必须在函数上声明并让调用者处理
+	 }
+	 if(b==0){
+	    throw new ArithmeticException("bei zero chu le"); //ArithmeticException的父类是RuntimeException所以不用声明也不用处理
+	 }
+	 return a/b;
+   }
+}
+
+class ExceptionDemo4{
+  public static void main(String[] args){
+     Demo d=new Demo();
+	 try{
+		int x=d.div(4,-1);
+		System.out.println("x="+x); 
+	 }catch(FushuException e){
+		 System.out.println("message:"+e.toString());
+	 }
+	 
+	 
+	 System.out.println("over");
+    
+  }
+}
+
+
+
+异常练习
+
+
+/*
+老师用电脑上课
+
+开始思考上课中出现的问题
+
+比如问题是;
+	电脑蓝屏
+	电脑冒烟
+
+要对问题进行描述，封装成对象。
+
+可是当冒烟发生后，出现讲课进度无法继续
+
+出现了讲师的问题：课时计划无法完成
+*/
+
+class Computer{
+	
+  private int state=1;
+  
+  public void run() throws LanPingException,SmokeException
+  { 
+    if(state==1){
+		throw new LanPingException("lan ping la");
+	}
+	if(state==2){
+		throw new SmokeException("mao yan la");
+	}
+    System.out.println("Computer Run");
+  }
+
+  public void reSet(){
+	state=0;
+    System.out.println("Reset Computer");
+  }
+
+}
+
+
+class LanPingException extends Exception{
+	
+	LanPingException(String msg){
+		super(msg);
+	}
+}
+
+class SmokeException extends Exception{
+	
+	SmokeException(String msg){
+		super(msg);
+	}
+}
+
+class NotHaveClassException extends Exception{
+	NotHaveClassException(String msg){
+		super(msg);
+	}
+	
+}
+
+
+
+class Teacher{
+  private String name;
+  private Computer c;
+  
+  Teacher(String name){
+    this.name=name;
+	c=new Computer();
+  }
+  
+  public void haveClass() throws NotHaveClassException
+  {
+       try{
+		   c.run();
+	   }catch(LanPingException e){
+		   System.out.println(e.toString());
+		   c.reSet();
+	   }catch(SmokeException e){
+		   //System.out.println(e.toString());
+		   test();
+		   throw new NotHaveClassException("bu nen have class la \nquestion: "+e.getMessage());
+	   }
+	   
+	   
+	  
+	   System.out.println("start class");
+    
+  }
+  
+   public void test(){
+	   System.out.println("zi ji zuo lian xi");
+   }
+}
+
+public class ExceptionClass{
+  public static void main(String[] args){
+     Teacher t=new Teacher("Lee");
+	 try{
+		t.haveClass(); 
+	 }catch(NotHaveClassException e){
+        System.out.println(e.toString()+"\nfang jia  ba");		 
+	 }
+	
+  }
+}

@@ -1,0 +1,790 @@
+File概述
+
+import java.io.*;
+
+class FileDemo{
+	public static void main(String[] args){
+		consMethod();
+	}
+
+	
+	//创建File对象 
+	public static void consMethod(){
+	
+		//将a.txt封装成file对象。可以将已有的和未出现的文件或者文件夹封装成对象。
+		File f1=new File("aj.txt");
+
+		File f2=new File("c:\\abc","b.txt");
+
+		File d=new File("c:\\abc");
+		File f3=new File(d,"c.txt");
+
+		
+		//打印出路径（封装的是相对路径就打印相对路径，封装绝对路径就打印绝对路径）
+		sop("f1:"+f1);
+		sop("f2:"+f2);
+		sop("f3:"+f3);
+
+		File f4=new File("c:"+File.separator+"abc"+File.separator+"zzz"+File.separator+"avf.txt");
+		sop(f4);
+
+
+	}
+
+	public static void sop(Object obj){
+		System.out.println(obj);
+	}
+}
+
+
+result:
+f1:aj.txt
+f2:c:\abc\b.txt
+f3:c:\abc\c.txt
+c:\abc\zzz\avf.txt
+
+
+
+
+
+2.File对象功能-创建和删除
+
+File类常见方法：
+1.创建。
+	boolean createNewFile():在指定位置创建文件，如果该文件已经存在，则不创建，返回false。
+					和输出流不一样，输出流对象一建立就创建文件，而且文件已经存在，会覆盖。
+					
+2.删除。
+	boolean delete():删除失败返回false。
+	void deleteOnExit();在程序退出时删除指定文件。（当创建文件后出现异常时，不能删除文件下，可以用这方法）
+
+
+public static void method_1()throws IOException{
+		File f=new File("file0807.txt");
+		f.deleteOnExit();
+		//sop("create:"+f.createNewFile());
+		sop("delete:"+f.delete());
+	}
+
+
+	
+	
+3.File对象功能-判断
+
+
+创建：
+boolean mkdir():创建文件夹（目录）、【只能创建一级文件夹】
+boolean mkdirs():创建多级文件夹
+
+
+判断：
+isFile()
+isDirectory()
+isHidden()  判断文件是否隐藏
+isAbsolute  判断是否是绝对路径（即使文件并不存在）
+
+public static void method_2()throws IOException{
+		File f=new File("FileDemo.java");
+
+		//sop("exists:"+f.exists());
+		//sop("execute:"+f.canExecute());
+
+		//File dir=new File("abc\\kkk\\ee\\tttt\\kada");
+		//sop("mkdir:"+dir.mkdirs());
+	}
+	
+	
+	
+	public static void method_3()throws IOException{
+		File f=new File("file.txt");
+
+		//f.createNewFile();
+		f.mkdir();
+
+		
+		//记住:在判断文件对象是否是文件或者目录时，必须要先判断该文件对象封装的内容是否存在
+		//通过exists判断
+		sop("dir:"+f.isDirectory());
+		sop("file:"+f.isFile());
+
+
+		File f1=new File("e:\\learnjava\\vvvv.txt");
+		sop("isAbsolute:"+f1.isAbsolute());
+	}
+	
+	
+	
+	
+
+	
+4.File对象功能-获取
+
+
+	public static void method_4()throws IOException{
+		File f=new File("file.txt");
+
+		sop("path:"+f.getPath());//这个路径的返回值由对象里的内容绝对，内容是相对就返回相对路径
+								//内容是绝对就返回绝对路径.
+		sop("abspath:"+f.getAbsolutePath());//返回绝对路径。
+		sop("parent:"+f.getParent());//该方法返回的是绝对路径中的父目录。如果获取的是相对路径，则返回null。
+									//如果相对路径中有上一层目录，那么该目录就是返回结果
+
+	}
+	
+	
+	
+	public static void method_5(){
+		File f1=new File("g:\\Ticket.txt");
+		File f2=new File("d:\\uuuuuuuuuuuuuuu.txt");
+
+		sop("renameTo"+f1.renameTo(f2)); //覆盖功能（步骤：删除原文件+重新创建=覆盖）
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+5.File对象功能-文件列表
+
+
+import java.io.*;
+
+class FileDemo2{
+	public static void main(String[] args){
+		listDemo();
+	}
+
+
+
+	public static void listDemo(){
+		File f=new File("c:\\");
+	    //列出目录下的所有文件（包括隐藏文件）
+		String[] names=f.list();//调用list方法的file对象必须是封装了一个目录（而不能是文件）。该目录还必须存在
+
+		for(String name:names){
+			System.out.println(name);
+		}
+	}
+	public static void listRootDemo(){
+		File[] files=File.listRoots();  //列出所有根盘符
+		for(File f:files){
+			System.out.println(f);
+		}
+	}
+}
+
+
+
+
+
+6.File对象功能-文件列表2
+
+
+
+功能：按条件过滤文件名称
+1.由于list(FilenameFilter filter)方中的FilenameFilter是一个接口，而且只有一个方法，可以使用
+匿名内部类的形式
+2.accept方法中的参数，第一个表示当前目录名，第二个表示该目录下的所有文件
+3.当accept方法返回true时，表示所有文件都满足不被过滤的条件；当为false时，表示所有文件都被过滤掉了
+4.这里需要对不满足是.java文件的进行过滤
+public static void listDemo2(){
+		File dir=new File("e:\\");
+		String [] arr=dir.list(new FilenameFilter(){
+
+			public boolean accept(File dir,String name){
+				//System.out.println("dir:"+dir+".....name:"+name);
+
+			/*
+				if(name.endsWith(".java")){
+					return true;
+				}else{
+					return false;
+				}
+			*/
+				return name.endsWith(".java");
+				
+			}
+		});
+
+		System.out.println("length="+arr.length);
+		for(String name:arr){
+			System.out.println(name);
+		}
+
+	}
+	
+	
+	
+	
+	通过listFiles()方法返回的File对象获取信息
+	注意：这个方法list()都是可以获取到关于文件的信息，但是通过返回File对象来获取在开发中更常见，而list()方法相对有点局限性
+	
+	public static void listDemo3(){
+		File dir=new File("c:\\");
+		File[] files=dir.listFiles();
+		for(File f:files){
+			System.out.println(f.getName()+"::"+f.length());
+		}
+	}
+	
+	
+	
+	
+	
+	
+7.IO流（列出目录下所有内容-递归）
+
+列出指定目录下文件或者文件夹，包含子目录中的内容。
+也就是列出指定目录下的所有内容。
+
+因为目录中还有目录，只要使用同一个列出目录功能的函数完成即可。
+在列出过程中出现的还是目录的话，还可以再次调用本功能。
+也就是函数自身调用自身。
+这种表现形式，或者编程手法，称为递归。
+
+递归要注意：
+1.限定条件
+
+2.要注意递归的次数，尽量避免内存溢出。
+
+import  java.io.*;
+
+class FileDemo3{
+	public static void main(String[] args){
+	//	File dir=new File("E:\\AAAAAAAAAAAAAA\\learning");
+	//	showDir(dir);
+
+	//	toBin(6);
+
+		int n=getSum(100);//如果求和的值太大，会出现StackOverFlowError错误
+		System.out.println("n="+n);
+	}
+
+
+	public static int getSum(int n){
+		if(n==1){
+			return 1;
+		}else{
+			return n+getSum(n-1);
+		}
+	}
+
+	public static void toBin(int num){
+		if(num>0){
+			toBin(num/2);
+			System.out.println(num%2);
+		}
+	}
+
+	public static void showDir(File dir){
+		System.out.println(dir);
+		File[] files=dir.listFiles();
+		for(int x=0;x<files.length;x++){
+			if(files[x].isDirectory()){
+				showDir(files[x]);
+			}else{
+				System.out.println(files[x]);
+			}
+		}
+	}
+}
+
+
+
+eg:
+voie showA(){
+	showB();
+	sop(A)
+}
+voie showB(){
+	showC();
+	sop(B)
+}
+voie showC(){
+	sop(C)
+}
+
+
+
+
+
+8.IO流（列出目录下所有内容-带层次）
+
+import java.io.*;
+
+class FileDemo4{
+	public static void main(String[] args){
+		File dir=new File("g:\\abc");
+		showDir(dir,0);
+	}
+
+
+	public static String getLevel(int level){
+		StringBuilder sb=new StringBuilder();
+		sb.append("|--");
+		for(int x=0; x<level; x++){
+			sb.insert(0,"|  ");
+		}
+		return sb.toString();
+	}
+
+	public static void showDir(File dir,int level){
+
+		System.out.println(getLevel(level)+dir.getName());
+		level++;
+
+		File[] files=dir.listFiles();
+		for(int x=0; x<files.length; x++){
+			if(files[x].isDirectory()){
+				showDir(files[x],level);
+			}else{
+				System.out.println(getLevel(level)+files[x]);
+			}
+		}
+	}
+}
+
+
+result：
+
+|--abc
+|  |--g:\abc\2.txt
+|  |--g:\abc\3.txt
+|  |--edf
+|  |  |--g:\abc\edf\1.txt
+|  |  |--kkkk
+|  |  |  |--g:\abc\edf\kkkk\1.txt
+|  |  |  |--g:\abc\edf\kkkk\2.txt
+|  |  |  |--g:\abc\edf\kkkk\3.txt
+
+
+
+
+
+
+
+
+9.IO流（删除带内容的目录）
+
+删除一个带内容的目录。
+删除原理：
+在window中，删除目录从里面往外删除
+既然是从里往外删除，就需要用到递归。
+
+import java.io.*;
+
+class RemoveDir{
+	public static void main(String[] args){
+		File dir=new File("g:\\abc");
+		removeDir(dir);
+	}
+
+	public static void removeDir(File dir){
+		File[] files=dir.listFiles();
+		for(int x=0;x<files.length;x++){
+			if(files[x].isDirectory()){
+				removeDir(files[x]);
+			}else{
+				System.out.println(files[x].toString()+"-----file----"+files[x].delete());
+			}
+		}
+		System.out.println(dir+"-----dir------"+dir.delete());
+	}
+}
+
+
+
+
+10.IO流（创建java文件列表）
+
+将一个指定目录下的java文件的绝对路径，存储到一个文本文件中。
+建立一个java文件列表文件。
+
+思路：
+1.对指定的目录进行递归
+2.获取递归过程所有的java文件的路径。
+3.将这些路径存储到集合中。
+
+
+import java.io.*;
+import java.util.*;
+
+class JavaFileList{
+	public static void main(String[] args)throws IOException{
+		File dir=new File("G:\\learnjava");
+		List<File> list=new ArrayList<File>();
+		fileToList(dir,list);
+		System.out.println(list.size());
+		File file=new File(dir,"filelist.txt");
+		listToFile(list,file.toString());
+	}
+
+	public static void fileToList(File dir,List<File> list){
+		File[] files=dir.listFiles();
+		for(File file : files){
+			if(file.isDirectory()){
+				fileToList(file,list);
+			}else{
+				if(file.getName().endsWith(".java")){
+					list.add(file);
+				}
+				
+			}
+			
+		}
+	}
+
+	public static void listToFile(List<File> list,String filelistname)throws IOException{
+		BufferedWriter bufw=null;
+		try{
+			bufw=new BufferedWriter(new FileWriter(filelistname));
+			for(File f : list){
+				String path=f.getAbsolutePath();
+				bufw.write(path);
+				bufw.newLine();
+				bufw.flush();
+			}
+		}catch(IOException e){
+			throw e;
+		}
+		finally{
+
+			try{
+				if(bufw!=null){
+					bufw.close();
+				}
+			}catch(IOException e){
+				throw e;
+			}
+		}
+	}
+}
+
+
+
+
+
+11.IO流（Properties简述）
+
+Perperties是hashtable的子类。
+也就是说它具备map集合的特点。而且它里面存储的键值对都是字符串。
+
+是集合中和IO技术相结合的集合容器。
+
+该对象的特点：可以用于键值对形式的配置文件
+
+那么在加载数据时，需要数据有固定格式：键=值	
+
+
+12.IO流（Properties存取）
+
+import java.io.*;
+import java.util.*;
+
+class PropertiesDemo{
+	public static void main(String[] args){
+		setAndGet();
+	}
+
+	
+	//设置和获取元素
+	public static void setAndGet(){
+		Properties prop=new Properties();
+
+		prop.setProperty("zhangsan","30");
+		prop.setProperty("lisi","39");
+
+		//System.out.println(prop);
+
+		String value=prop.getProperty("lisi");
+		//System.out.println(value);
+
+		prop.setProperty("lisi","89");
+		Set<String>  names=prop.stringPropertyNames();
+		for(String s : names){
+			System.out.println(s+":"+prop.getProperty(s));
+		}
+
+	}
+}
+
+
+
+
+13.IO流（Properties存取配制文件）
+
+
+演示：如何将流中的数据存储到集合中。
+想要将info.txt中键值数据存到集合中进行操作。
+
+1.用一个流和info.txt文件关联。
+2.读取一行数据，将该行数据用"="进行切割。
+3.等号左边作为键，右边作为值。存入到Properties集合中即可。
+
+	public static void method_1()throws IOException{
+		BufferedReader  bufw=new BufferedReader(new FileReader("e:\\learnjava\\info.txt"));
+		String line=null;
+		Properties prop=new Properties();
+
+		while((line=bufw.readLine())!=null){
+			String[] arr=line.split("=");
+			prop.setProperty(arr[0],arr[1]);
+		}
+		bufw.close();
+		System.out.println(prop);
+	}
+	
+	
+	
+	
+
+	
+	
+public static void loadDemo()throws IOException{
+		Properties prop=new Properties();
+		FileInputStream fis=new FileInputStream("e:\\learnjava\\info.txt");
+		prop.load(fis);//将流中的数据加载进集合。
+
+
+		//System.out.println(prop);
+	
+
+		prop.setProperty("wangwu","50");
+		FileOutputStream fos=new FileOutputStream("e:\\learnjava\\info.txt");
+		prop.store(fos,"haha");//如果不用此方法，那么重新改变的值只在内存中有效，而此方法是将修改的值存入文件中
+		prop.list(System.out);//可以直接用此方法打印
+
+		fis.close();
+		fos.close();
+	}
+	
+	
+	
+	
+	
+14.IO流（Properties练习）
+
+用于记录应用程序运行次数。
+如果使用次数已到，那么给出注册提示。
+
+很容易想到的是：计数器。
+可是该计数器定义在程序中，随着程序的运行而在内存中存在，并进行自增。
+可是随着该应用程序的退出，该计数器也在内存中消失了。
+
+下一次在启动该程序，又重新开始从0计数。
+这样不是我们想要的。
+
+程序即使结束，该计数器的值也存在，
+下次程序启动会在先加载该计数器的值并加1后在重新存储起来。
+
+所以要建立一个配置文件，用一记录该软件的使用次数。
+
+该配置文件使用键值对的形式。
+这样便于阅读数据，并操作数据。
+
+
+键值对数据是map集合。
+数据是以文件形式储存，使用ior技术。
+那么 map + io  --->properties。
+
+配置文件可以实现应用程序数据的共享。
+
+
+知识扩展：
+一般软件的配置文件通常以如下几种格式：
+.ini
+.properties(键值对格式表示)
+.xml
+
+
+import java.io.*;
+import java.util.*;
+
+class RunCount{
+	public static void main(String[] args)throws IOException{
+		Properties prop=new Properties();
+
+		File file=new File("count.ini");
+		if(!file.exists()){
+			file.createNewFile();
+		}
+
+		FileInputStream fis=new FileInputStream(file);
+
+		prop.load(fis);
+
+		int count=0;
+
+		String value=prop.getProperty("times");
+
+		if(value!=null){
+			count=Integer.parseInt(value);
+			if(count>=5){
+				System.out.println("hello,times has been None!");
+				return ;
+			}
+		}
+		count++;
+		prop.setProperty("times",count+"");
+
+		FileOutputStream fos=new FileOutputStream(file);
+		prop.store(fos,"");
+
+		fis.close();
+		fos.close();
+	}
+}
+
+
+
+
+15.IO流（PrintWrite）
+
+打印流：
+该流提供了打印方法，可以将各种数据类型的数据都原样打印。
+
+字节打印流：
+printStream
+构造函数可以接收的参数类型：
+1.file对象 File
+2.字符串路径。String
+3.字节输出流。OutputStream
+
+
+字符打印流：
+PrintWriter
+构造函数可以接收的参数类型。
+1.file对象 File
+2.字符串路径。String
+3.字节输出流。OutputStream
+4.字符输出流。Writer
+
+
+import java.io.*;
+
+class PrintStreamDemo{
+	public static void main(String[] args)throws IOException{
+		BufferedReader bufr=new BufferedReader(new InputStreamReader(System.in));
+		//PrintWriter  out=new PrintWriter(System.out);
+		PrintWriter  out=new PrintWriter(new FileWriter("a.txt",true));
+		String line=null;
+
+		while((line=bufr.readLine())!=null){
+			if("over".equals(line)){
+				break;
+			}
+			//out.write(line.toUpperCase());
+			out.println(line.toUpperCase());
+			out.flush();
+		}
+
+		out.close();
+		bufr.close();
+	}
+}
+
+
+
+
+
+
+
+16.IO流（合并流）
+
+import java.io.*;
+import java.util.*;
+class SequenceDemo{
+	public static void main(String[] args)throws IOException{
+		Vector<FileInputStream>  v=new Vector<FileInputStream>();
+
+		v.add(new FileInputStream("g:\\1.txt"));
+		v.add(new FileInputStream("g:\\2.txt"));
+		v.add(new FileInputStream("g:\\3.txt"));
+
+		Enumeration<FileInputStream> en=v.elements();
+
+		SequenceInputStream sis=new SequenceInputStream(en);
+
+		FileOutputStream fos=new FileOutputStream("g:\\4.txt");
+
+		byte[] buf=new byte[1024];
+
+		int len=0;
+		while((len=sis.read(buf))!=-1){
+			fos.write(buf,0,len);
+		}
+		fos.close();
+		sis.close();
+	}
+}
+
+
+
+
+
+
+17.IO流（切割文件）
+
+
+import java.io.*;
+import java.util.*;
+class SplitFile{
+	public static void main(String[] args)throws IOException{
+		//splitFile();
+		merge();
+	}
+
+
+	public static void merge()throws IOException{
+		ArrayList<FileInputStream>  al=new ArrayList<FileInputStream>();
+
+		for(int x=1; x<=4; x++){
+			al.add(new FileInputStream("g:\\splitfile\\"+x+".part"));
+		}
+
+		final Iterator<FileInputStream>  it=al.iterator();
+
+		Enumeration<FileInputStream>  en=new Enumeration<FileInputStream>(){
+			public boolean hasMoreElements(){
+				return it.hasNext();
+			}
+
+			public FileInputStream nextElement(){
+				return it.next();
+			}
+		};
+
+		SequenceInputStream sis=new SequenceInputStream(en);
+
+		FileOutputStream fos=new FileOutputStream("g:\\splitfile\\0.mp3");
+
+		byte[] buf=new byte[1024];
+		int len=0;
+		while((len=sis.read(buf))!=-1){
+			fos.write(buf,0,len);
+		}
+
+		fos.close();
+		sis.close();
+	}
+
+	public static void splitFile()throws IOException{
+		FileInputStream fis=new FileInputStream("g:\\1.mp3");
+		FileOutputStream fos=null;
+
+		byte[] buf=new byte[1024*1024];
+
+		int len=0;
+		int count=1;
+		while((len=fis.read(buf))!=-1){
+			fos=new FileOutputStream("g:\\splitfile\\"+(count++)+".part");
+			fos.write(buf,0,len);
+			fos.close();
+		}
+		fis.close();
+	}
+}

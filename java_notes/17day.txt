@@ -1,0 +1,608 @@
+1.Collections-sort
+
+public static <T extends Comparable<? super T>> void sort(List<T> list);
+上面参数中List的泛型可以任意但是必须得具备比较性，因此就得进行泛型限定（必须实现Comparable）
+
+import java.util.*;
+
+class CollectionsDemo{
+	public static void main(String[] args){
+		sortDemo();
+	}
+
+	public static void sortDemo(){
+		List<String> list=new ArrayList<String>();
+
+		list.add("abcd");
+		list.add("aaa");
+		list.add("z");
+		list.add("kkkkk");
+		list.add("qq");
+		list.add("z");
+
+		sop(list);
+
+		//Collections.sort(list);
+		Collections.sort(list,new StrLenComparator());//按长度排序
+		sop(list);
+    }
+
+	public static void sop(Object obj){
+		System.out.println(obj);
+	}
+}
+
+class StrLenComparator implements Comparator<String>{
+	public int compare(String s1,String s2){
+		if(s1.length()>s2.length()){
+			return 1;
+		}
+		if(s1.length()<s2.length()){
+			return -1;
+		}
+		return s1.compareTo(s2);
+	}
+}
+
+
+result:
+[abcd, aaa, z, kkkkk, qq, z]
+[z, z, qq, aaa, abcd, kkkkk]
+
+
+
+
+
+2.Collections-max
+
+import java.util.*;
+
+class CollectionsDemo1{
+	public static void main(String[] args){
+		sortDemo();
+	}
+
+	public static void sortDemo(){
+		List<String> list=new ArrayList<String>();
+
+		list.add("abcd");
+		list.add("aaa");
+		list.add("z");
+		list.add("kkkkk");
+		list.add("qq");
+		list.add("z");
+
+		Collections.sort(list);
+		sop(list);
+		String max=Collections.max(list/*,new StrLenComparator()*/)
+		sop("max="+max);
+    }
+
+	public static void sop(Object obj){
+		System.out.println(obj);
+	}
+}
+
+class StrLenComparator implements Comparator<String>{
+	public int compare(String s1,String s2){
+		if(s1.length()>s2.length()){
+			return 1;
+		}
+		if(s1.length()<s2.length()){
+			return -1;
+		}
+		return s1.compareTo(s2);
+	}
+}
+
+result:
+[aaa, abcd, kkkkk, qq, z, zz]
+max=zz
+
+
+
+
+
+
+
+
+
+4.Collections(替换和反转)
+
+import java.util.*;
+
+class CollectionsDemo2{
+	public static void main(String[] args){
+		fillDemo();
+		replaceAllDemo();
+		reverseDemo();
+	}
+
+	public static void fillDemo(){
+		List<String> list=new ArrayList<String>();
+
+		list.add("abcd");
+		list.add("aaa");
+		list.add("zz");
+		list.add("kkkkk");
+		list.add("z");
+
+		sop(list);
+		Collections.fill(list,"qq");
+		sop(list+"\n");
+	}
+
+ 
+    public static void replaceAllDemo(){
+		List<String> list=new ArrayList<String>();
+
+		list.add("abcd");
+		list.add("aaa");
+		list.add("zz");
+		list.add("kkkkk");
+		list.add("z");
+
+		sop(list);
+		Collections.replaceAll(list,"aaa","uuuu");  //相当于使用set方法来将指定元素设置新值，这个方法只是封装了一下
+		sop(list+"\n");
+	}
+
+	public static void reverseDemo(){
+		List<String> list=new ArrayList<String>();
+
+		list.add("abcd");
+		list.add("aaa");
+		list.add("zz");
+		list.add("kkkkk");
+		list.add("z");
+
+		sop(list);
+		Collections.reverse(list);
+		sop(list);
+	}
+	public static void sop(Object obj){
+		System.out.println(obj);
+	}
+}
+
+
+result:
+
+[abcd, aaa, zz, kkkkk, z]
+[qq, qq, qq, qq, qq]
+
+[abcd, aaa, zz, kkkkk, z]
+[abcd, uuuu, zz, kkkkk, z]
+
+[abcd, aaa, zz, kkkkk, z]
+[z, kkkkk, zz, aaa, abcd]
+
+
+
+
+5.Collections(reverseOrder)
+
+api(以下两个方法都返回比较器对象):
+public static <T> Comparator<T> reverseOrder()
+public static <T> Comparator<T> reverseOrder(Comparator<T> cmp)
+
+
+
+import java.util.*;
+
+class CollectionsDemo3{
+	public static void main(String[] args){
+		orderDemo();
+
+	}
+
+	public static void orderDemo(){
+		//按长度由大到小排序
+		Set<String> list=new TreeSet<String>(Collections.reverseOrder(new StrLenComparator()));
+
+		list.add("abcde");
+		list.add("aaa");
+		list.add("k");
+		list.add("cc");
+
+		for(Iterator it=list.iterator();it.hasNext();){
+			sop(it.next());
+		}
+	}
+
+
+	public static void sop(Object obj){
+		System.out.println(obj);
+	}
+}
+
+
+class StrComparator implements Comparator<String>{
+	public int compare(String s1,String s2){
+		
+		return s1.compareTo(s2);
+	/*
+		int num=s1.compareTo(s2);
+		if(num>0)
+			return 1;
+		if(num<0)
+			return -1;
+		return num;
+	*/
+	}
+}
+
+
+class StrLenComparator implements Comparator<String>{
+	public int compare(String s1,String s2){
+		
+		if(s1.length()>s2.length())
+			return 1;
+		if(s1.length()<s2.length())
+			return -1;
+		return s1.compareTo(s2);
+
+		//int num=new Integer(s1.length()).compareTo(new Integer(s2.length()));
+		//if(num==0){
+		//	s1.compareTo(s2);
+		//}
+		//return num;
+	}
+}
+
+result:
+
+abcde
+aaa
+cc
+k
+
+若把Set<String> list=new TreeSet<String>(Collections.reverseOrder());时要以直接对字符串反向排序
+不加之前：
+aaa
+abcde
+cc
+k
+
+加Collections.reverseOrder()之后
+k
+cc
+abcde
+aaa
+
+
+
+
+
+6.集合（Collections-SynList）
+
+因为集合中大部分的方法都是线程不安全的，所以在Collections中有提供线程安全的方法
+
+以下代码是swap方法实现两个元素间置换，和shuffle实现list集合随机排列
+
+import java.util.*;
+
+class CollectionsDemo4{
+	public static void main(String[] args){
+		swapDemo();
+		shuffle();	
+	}
+
+	public static void swapDemo(){
+		List<String>  list=new ArrayList<String>();
+
+		list.add("abcde");
+		list.add("aaa");
+		list.add("k");
+		list.add("cc");
+
+		sop(list);
+		Collections.swap(list,1,2);
+		sop(list);
+	}
+
+	public static void shuffle(){
+		List<String>  list=new ArrayList<String>();
+
+		list.add("abcde");
+		list.add("aaa");
+		list.add("k");
+		list.add("cc");
+
+		sop(list);
+		Collections.shuffle(list);
+		sop(list);
+	}
+
+	public static void sop(Object obj){
+		System.out.println(obj);
+	}
+}
+
+result:
+[abcde, aaa, k, cc]
+[abcde, k, aaa, cc]
+
+[abcde, aaa, k, cc]
+[cc, abcde, k, aaa]
+
+
+
+
+7.集合（Arrays）
+
+Arrays:用于操作数组的工具类。
+里面都是静态方法。
+
+asList：将数组变成list集合
+
+import java.util.*;
+
+class ArraysDemo{
+	public static void main(String[] args){
+	//	int[] arr={2,4,5};
+	//	System.out.println(Arrays.toString(arr));
+
+		String[] arr={"abc","cc","kkkk"};
+		
+		//把数组变成list集合有什么好处？
+		 要以使用集合的思想和方法来操作数组中的元素。
+		 
+		 注意：将数组变成集合，不可以使用集合的增删方法。
+		 因为数组的长度是固定的。
+		 contains()
+		 get()
+		 indexOf()
+		 subList();
+		 如果你增删，那么会发生UnsupportedOperationException
+	//	List<String> list=Arrays.asList(arr);
+	//	sop("contains:"+list.contains("cc"));
+	//	list.add("qq");//UnsupportedOperationException
+	//	sop(list);
+
+		int [] nums={2,4,5};
+		List li=Arrays.asList(nums);
+		
+		/*
+		如果数组中的元素都是对象，那么变成集合时，数组中的元素就直接转成集合中的元素。
+		如果数组中的元素都是基本数据类型，那么会将该数组作为集合中的元素存在
+		*/
+		
+		sop(li);   //[[I@390ede48] ，它是把nums作为集合中的元素了
+	}
+
+	public static void sop(Object obj){
+		System.out.println(obj);
+	}
+}
+
+
+
+
+
+
+8.集合转成数组
+
+集合变数组。
+Collection接口中的toArray方法。
+
+import java.util.*;
+
+class CollectionToArray{
+	public static void main(String[] args){
+		ArrayList<String> al=new ArrayList<String>();
+		al.add("abc1");
+		al.add("abc2");
+		al.add("abc3");
+
+		/*
+		1.指定类型的数组到底定义多长呢？
+		当指定类型的数组长度小于了集合的size，那么该方法内部会创建一个新的数组，长度为集合的size。
+		当指定类型的数组长度大于了集合的size，就不会新创建数组，而是使用传递进来的数组。
+		所以创建一个刚刚好的数组最优。
+		
+		2.为什么要将集合变成数组？
+		为了限定元素的操作，不需要进行增删了。
+		*/
+		String[] arr=al.toArray(new String[al.size()]);
+		System.out.println(Arrays.toString(arr));
+	}
+}
+
+
+9.集合（增强for循环）
+
+高级for循环
+
+格式：
+for(数据类型  变量名 ：被遍历的集合(Collection)或者数组){
+}
+
+对集合进行遍历。
+只能获取元素，但是不能对集合进行操作。
+
+迭代器除了遍历，还可以进行remove集合中元素的动作。
+如果是用ListIterator，还可以在遍历过程对集合进行增删改查的操作
+
+传统for和高级for有什么区别呢？
+高级for有一个局限性。必须有被遍历的目标。(比如如果要打印100个hellworld就不能用这个)
+
+建议在遍历数组的时候，还是希望是用传统for,因为传统for可以定义脚标。
+
+
+import java.util.*;
+
+class ForEachDemo{
+	public static void main(String[] args){
+		ArrayList<String>  al=new ArrayList<String>();
+
+		al.add("abc1");
+		al.add("abc2");
+		al.add("abc3");
+		
+		for(String s:al){
+			//s="kk";
+			System.out.println(s);
+		}
+		/*
+		Iterator<String> it=al.iterator();
+		while(it.hasNext()){
+			System.out.println(it.next());
+		}
+		*/
+
+		int[] arr={3,5,1};
+
+		for(int x=0;x<arr.length;x++){
+			System.out.println(arr[x]);
+		}
+		for(int i:arr){
+			System.out.println("i:"+i);
+		}
+
+
+		HashMap<Integer,String> hm=new HashMap<Integer,String>();
+		hm.put(1,"a");
+		hm.put(2,"b");
+		hm.put(3,"c");
+
+		Set<Integer> keyset=hm.keySet();
+		for(Integer i:keyset){
+			System.out.println(i+"----------"+hm.get(i));
+		}
+
+
+		//Set<Map.Entry<Integer,String>>  entryset=hm.entrySet();
+		//for(Map.Entry<Integer,String> me:entryset){}
+
+		for(Map.Entry<Integer,String> me:hm.entrySet()){
+			System.out.println(me.getKey()+"==========="+me.getValue());	
+		}
+	}
+}
+
+
+result:
+abc1
+abc2
+abc3
+3
+5
+1
+i:3
+i:5
+i:1
+1----------a
+2----------b
+3----------c
+1===========a
+2===========b
+3===========c
+
+
+
+
+
+
+
+10.可变参数
+
+
+JDK1.5版本出现的新特性。
+
+方法的可变参数。
+在使用时注意：可变参数一定要定义在参数列表最后面。
+
+class ParamMethodDemo{
+	public static void main(String[] args){
+		//show(3,4);
+		
+		/*
+		//虽然少定义了多个方法。
+		但是每次都要定义一个数组，作为实际参数。
+		
+		int[] arr={3,4};
+		show(arr);
+
+		intpp[] arr1={2,3,4,5};
+		show(arr1);
+		*/
+
+		/*
+		可变参数。
+		其实就是上一处数组参数的简写形式。
+		不用每一次都手动的建立数组对象。
+		只要将要操作的元素作为参数传递即可。
+		隐式将这些参数封装了了数组
+		*/
+		show("haha",2,3,4,5,6);
+		//show();
+
+	}
+
+	public static void show(String str,int... arr){
+		System.out.println(arr.length);
+	}
+
+	/*
+	public static viod show(int a,int b){
+	
+	}
+
+	public static viod show(int a,int b,int c){
+	
+	}
+	*/
+}
+
+
+result:
+
+E:\learnjava>java ParamMethodDemo
+5
+
+
+
+
+
+
+
+
+
+11.静态导入
+
+
+
+/*
+StaticImport 静态导入。
+
+当类名重名时，需要指定具体的包名。
+当方法重名时，指定具体所属的对象或者类。
+
+*/
+
+
+import java.util.*;
+import static java.util.Arrays.*;
+
+/*
+packa/Demo.class
+packb/Demo.class
+
+import packa.*;
+import packb.*;
+*/
+
+import static java.lang.System.*;  //导入了System类中所有静态成员。
+
+class StaticImport extends Object{
+	public static void main(String[] args){
+		out.println("haha");
+		int[] arr={1,3,5};
+
+		sort(arr);
+		int index=binarySearch(arr,1);
+		out.println(Arrays.toString(arr));
+		System.out.println("index="+index);
+	}
+}

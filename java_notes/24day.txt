@@ -1,0 +1,942 @@
+1.网络编程（TCP-上传图片）
+
+需求：上传图片
+
+
+客户端：
+1.建立服务端点
+2.读取客户端已有的图片数据。
+3.通过socket输出流将数据发给服务端。
+4.读取服务端反馈信息。
+5.关闭。
+
+
+注意，在客户端的循环中当判断-1结束后，而里面的out.write()把最后的数据发过去时并没有带结束标记，
+导致服务端那边不能判断是否到-1了，因此服务端那边的循环到最后并不能结束，
+所以需要通过shutdownOutput()告诉服务端数据已写完。
+
+import java.io.*;
+import java.net.*;
+
+class PicClient{
+	public static void main(String[] args)throws Exception{
+		Socket s=new Socket("192.168.1.103",10007);
+
+		FileInputStream fis=new FileInputStream("C:\\Users\\lili\\Pictures\\Camera Roll\\1.jpg");
+
+		OutputStream out=s.getOutputStream();
+
+		byte[] buf=new byte[1024];
+
+		int len=0;
+
+		while((len=fis.read(buf))!=-1){
+			out.write(buf,0,len);  
+		}
+
+		s.shutdownOutput();//告诉服务端数据已写完
+
+
+		InputStream in=s.getInputStream();
+
+		byte[] by=new byte[1024];
+
+		int num=in.read(by);
+		System.out.println(new String(by,0,num));
+
+		fis.close();
+		s.close();
+	}
+}
+
+/*
+服务端
+*/
+
+class PicServer{
+	public static void main(String[] args)throws Exception{
+		ServerSocket ss=new ServerSocket(10007);
+
+		Socket s=ss.accept();
+
+		InputStream in=s.getInputStream();
+
+		FileOutputStream fos=new FileOutputStream("server.jpg");
+
+		byte[] buf=new byte[1024];
+
+		int len=0;
+
+		while((len=in.read(buf))!=-1){
+			fos.write(buf,0,len);
+		}
+
+
+		OutputStream out=s.getOutputStream();
+
+		out.write("upload success".getBytes());
+
+		fos.close();
+		s.close();
+		ss.close();
+	}
+}
+
+
+
+
+
+
+
+
+2.网络编程（TCP-客户端并发上传图片）
+
+
+
+import java.io.*;
+import java.net.*;
+
+class PicClient{
+	public static void main(String[] args)throws Exception{
+
+		if(args.length!=1){
+			System.out.println("please choose a jpg picture");
+			return;
+		}
+
+		File file=new File(args[0]);
+		if(!(file.exists() && file.isFile())){
+			System.out.println("this file maybe not exists or not file");
+			return;
+		}
+
+		if(!file.getName().endsWith(".jpg")){
+			System.out.println("picture style is error,please choose again");
+			return;
+		}
+
+		if(file.length()>1024*1024*5){
+			System.out.println("file is so big");
+			return;
+		}
+
+
+
+		Socket s=new Socket("192.168.1.103",10008);
+
+		FileInputStream fis=new FileInputStream(file);
+
+		OutputStream out=s.getOutputStream();
+
+		byte[] buf=new byte[1024];
+
+		int len=0;
+
+		while((len=fis.read(buf))!=-1){
+			out.write(buf,0,len);
+		}
+
+		s.shutdownOutput();
+
+
+		InputStream in=s.getInputStream();
+
+		byte[] by=new byte[1024];
+
+		int num=in.read(by);
+		System.out.println(new String(by,0,num));
+
+		fis.close();
+		s.close();
+	}
+}
+
+
+class PicThread implements Runnable{
+	private Socket s;
+	PicThread(Socket s){
+		this.s=s;
+	}
+
+
+	public void run(){
+
+		int count=1;
+		String ip=s.getInetAddress().getHostAddress();
+
+		try{
+			
+			System.out.println(ip+".....connected");
+
+			InputStream in=s.getInputStream();
+
+
+			File file=new File(ip+"("+(count)+")"+".jpg");
+
+			while(file.exists()){
+				file=new File(ip+"("+(count++)+")"+".jpg");
+			}
+
+			FileOutputStream fos=new FileOutputStream(file);
+
+			byte[] buf=new byte[1024];
+
+			int len=0;
+
+			while((len=in.read(buf))!=-1){
+				fos.write(buf,0,len);
+			}
+
+
+			OutputStream out=s.getOutputStream();
+
+			out.write("upload success".getBytes());
+
+			fos.close();
+			s.close();
+		
+
+		}catch(Exception e){
+			throw new RuntimeException(ip+"upload fail!!");
+		}
+		
+	}
+}
+
+
+
+服务端
+
+这个服务端有个局限性。当A客户端连接上以后，被服务端获取到，服务端执行具体流程。
+这时B客户端连接，只有等待。
+因为服务端还没有处理完A客户端的请求，没有循环回来执行下次accept方法。所以
+暂时获取不到B客户端对象。
+
+那么为了可以让多个客户端同时并发访问服务端。
+那么服务端最好就是将每个客户端封装到一个单独的线程中，这样就要以同时处理多个客户端请求。
+
+
+如何定义线程呢？
+
+只要明确了每一个客户端要在服务端执行的代码即可。将该代码存入run方法中。
+
+
+
+class PicServer{
+	public static void main(String[] args)throws Exception{
+		ServerSocket ss=new ServerSocket(10008);
+
+		while(true){
+
+			Socket s=ss.accept();
+			System.out.println(s);
+			new Thread(new PicThread(s)).start();
+		}
+
+		//	ss.close();
+	}
+}
+
+
+
+
+
+
+
+3.网络编程（TCP-客户端并发登录）
+
+
+import java.io.*;
+import java.net.*;
+
+class LoginClient{
+	public static void main(String[] args)throws Exception{
+
+		Socket s=new Socket("192.168.1.103",10009);
+
+		BufferedReader bufr=new BufferedReader(new InputStreamReader(System.in));
+
+		PrintWriter out=new PrintWriter(s.getOutputStream(),true);
+
+		BufferedReader bufIn=new BufferedReader(new InputStreamReader(s.getInputStream()));
+
+		for(int x=0; x<3; x++){
+			String line=bufr.readLine();
+			if(line==null){
+				break;
+			}
+			out.println(line);
+
+			String info=bufIn.readLine();
+			System.out.println("info:"+info);
+			if(info.contains("welcome")){
+				break;
+			}
+		}
+
+		bufr.close();
+		s.close();
+
+	}
+}
+
+
+class UserThread implements Runnable{
+	private Socket s;
+	UserThread(Socket s){
+		this.s=s;
+	}
+
+	public void run(){
+
+		String ip=s.getInetAddress().getHostAddress();
+		System.out.println(ip+"......connected");
+		
+		try{
+
+			for(int x=0; x<3; x++){
+
+				BufferedReader bufIn=new BufferedReader(new InputStreamReader(s.getInputStream()));
+
+				BufferedReader bufr=new BufferedReader(new FileReader("user.txt"));
+
+				PrintWriter out=new PrintWriter(s.getOutputStream(),true);
+
+				String name=bufIn.readLine();
+				if(name==null){
+					break;
+				}
+
+				String line=null;
+
+				//用标记来标识，如果为true说明该用户已经在库中存在.
+				//下面的循环说明：假如第一个读取的名称是lisi(库里第一个是zhangsan)，判断不相等后会再次执行bufr.readLine()
+				//直到两个相等时，把flag=true。
+				
+				boolean flag=false;
+
+				while((line=bufr.readLine())!=null){
+
+					if(line.equals(name)){
+						flag=true;
+						break;
+					}
+				}
+
+				
+
+				if(flag){
+					System.out.println(name+",Logined");
+					out.println(name+",welcome logined");
+					break;
+				}else{
+					System.out.println(name+",try login");
+					out.println(name+",user name isn`t exists");
+				}
+			}
+
+			s.close();
+
+		}catch(Exception e){
+			throw new RuntimeException("verity fail");
+		}
+		
+	}
+}
+
+
+class LoginServer{
+	public static void main(String[] args)throws Exception{
+		ServerSocket ss=new ServerSocket(10009);
+
+		while(true){
+			Socket s=ss.accept();
+			new Thread(new UserThread(s)).start();
+		}
+	}
+}
+
+
+
+
+
+
+
+
+4.网络编程（浏览器客户端-自定义服务端）
+
+
+演示客户端和服务端
+
+1.客户端：浏览器
+  服务端：自定义
+
+
+import java.io.*;
+import java.net.*;
+
+class ServerDemo{
+	public static void main(String[] args)throws Exception{
+		ServerSocket ss=new ServerSocket(11000);
+
+		Socket s=ss.accept();
+
+		System.out.println(s.getInetAddress().getHostAddress());
+
+
+		PrintWriter out=new PrintWriter(s.getOutputStream(),true);
+
+		out.println("<font color='red'  size='7'>hello,client</font>");
+
+		s.close();
+
+		ss.close();
+	}
+}
+
+
+
+
+
+
+
+5.网络编程（浏览器客户端-Tomcat服务端）
+
+客户端：浏览器
+服务端：Tomcat服务器
+
+
+
+
+
+
+6.网络编程（自定义浏览器-Tomcat服务端）
+
+
+import java.io.*;
+import java.net.*;
+
+class ServerDemo{
+	public static void main(String[] args)throws Exception{
+		ServerSocket ss=new ServerSocket(11000);
+
+		Socket s=ss.accept();
+
+		System.out.println(s.getInetAddress().getHostAddress());
+
+
+		InputStream in=s.getInputStream();
+
+		byte[] buf=new byte[1024];
+
+		int len=in.read(buf);
+
+		System.out.println(new String(buf,0,len));
+
+
+		PrintWriter out=new PrintWriter(s.getOutputStream(),true);
+
+		out.println("<font color='red'  size='7'>hello,client</font>");
+
+		s.close();
+
+		ss.close();
+	}
+}
+
+
+结果：
+192.168.1.103
+GET / HTTP/1.1
+Host: 192.168.1.103:11000
+Connection: keep-alive
+Cache-Control: max-age=0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.112 Safari/537.36
+Accept-Encoding: gzip, deflate, sdch
+Accept-Language: zh-CN,zh;q=0.8  
+
+
+
+
+
+把浏览器url改为：http://192.168.1.103:11000/myweb/demo.html
+结果：
+192.168.1.103
+GET /myweb/demo.html HTTP/1.1
+Host: 192.168.1.103:11000
+Connection: keep-alive
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.112 Safari/537.36
+Accept-Encoding: gzip, deflate, sdch
+Accept-Language: zh-CN,zh;q=0.8
+
+根据上面的结果，通过代码带入
+
+
+import java.io.*;
+import java.net.*;
+
+class MyIE{
+	public static void main(String[] args)throws Exception{
+		Socket s=new Socket("192.168.1.103",8080);
+
+		PrintWriter out=new PrintWriter(s.getOutputStream(),true);
+
+		out.println("GET /myweb/demo.html HTTP/1.1");
+		out.println("Host: 192.168.1.103:11000");
+		out.println("Accept-Language: zh-CN");
+		out.println("Accept: */*");
+		out.println("Connection: closed");
+		
+		out.println();
+		out.println();
+
+
+		BufferedReader bufr=new BufferedReader(new InputStreamReader(s.getInputStream()));
+
+		String line=null;
+
+		while((line=bufr.readLine())!=null){
+			System.out.println(line);
+		}
+
+		s.close();
+	}
+}
+
+上面代码执行的结果：
+HTTP/1.1 200 OK
+Server: Apache-Coyote/1.1
+Accept-Ranges: bytes
+ETag: W/"255-1472981093292"
+Last-Modified: Sun, 04 Sep 2016 09:24:53 GMT
+Content-Type: text/html
+Content-Length: 255
+Date: Sun, 04 Sep 2016 10:14:34 GMT
+
+<html>
+        <body>
+                <h1>这是我的主页</h1>
+                <font size=5 color=red>欢迎光临</font>
+                <div>
+                  塔城撒发生顶戴阿斯蒂芬阿斯蒂斯蒂芬</br>
+                  塔城撒发生顶戴阿斯蒂芬阿斯蒂斯蒂芬</br>
+                  塔城撒发生顶戴阿斯蒂芬阿斯蒂斯蒂芬</br>
+                </div>
+        </body>
+
+
+</html>
+
+
+
+
+
+
+7.网络编程（自定义图形界面浏览器-Tomcat服务端）
+
+import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
+import java.net.*;
+
+class MyIEByGUI{
+	private Frame f;
+	private TextField tf;
+	private Button but;
+	private TextArea ta;
+
+	private Dialog d;
+	private Label lab;
+	private Button okBut;
+
+	MyIEByGUI(){
+		init();
+	}
+
+	public void init(){
+		f=new Frame("my window");
+		f.setBounds(300,100,600,500);
+		f.setLayout(new FlowLayout());
+
+		tf=new TextField(50);
+
+		but=new Button("Go");
+
+		ta=new TextArea(25,55);
+
+
+
+		d=new Dialog(f,"tipmessage-self",true);
+		d.setBounds(400,200,240,150);
+		d.setLayout(new FlowLayout());
+		lab=new Label();
+		okBut=new Button("ok");
+
+		d.add(lab);
+		d.add(okBut);
+
+
+
+
+
+
+		f.add(tf);
+		f.add(but);
+		f.add(ta);
+
+		myEvent();
+
+		f.setVisible(true);
+
+}
+		private void myEvent(){
+
+			okBut.addActionListener(new ActionListener(){
+				public void actionPerformed(ActionEvent e){
+					d.setVisible(false);
+				}
+			});
+
+
+			d.addWindowListener(new WindowAdapter(){
+			public void windowClosing(WindowEvent e){
+				d.setVisible(false );
+			}
+		});
+
+			tf.addKeyListener(new KeyAdapter(){
+				public void keyPressed(KeyEvent e){
+					if(e.getKeyCode()==KeyEvent.VK_ENTER){
+						try{
+							showDir();
+						}catch(Exception ex){
+
+						}
+						
+					}
+				}
+			});
+
+
+
+			but.addActionListener(new ActionListener(){
+				public void actionPerformed(ActionEvent e){
+					try{
+							showDir();
+						}catch(Exception ex){
+
+						}
+					
+				}
+			});
+		
+
+
+		f.addWindowListener(new WindowAdapter(){
+			public void windowClosing(WindowEvent e){
+				System.exit(0);
+			}
+		});
+	}
+
+		private void showDir()throws Exception{
+
+			ta.setText("");
+			String url=tf.getText();//http://192.168.1.103:8080/myweb/demo.html
+
+			int index1=url.indexOf("//")+2;
+
+			int index2=url.indexOf("/",index1);
+
+
+
+			String str=url.substring(index1,index2);
+			String[] arr=str.split(":");
+			String host=arr[0];
+			int port =Integer.parseInt(arr[1]);
+
+			String path=url.substring(index2);
+
+
+			Socket s=new Socket(host,port);
+
+			PrintWriter out=new PrintWriter(s.getOutputStream(),true);
+
+			out.println("GET /myweb/demo.html HTTP/1.1");
+			out.println("Host: 192.168.1.103:11000");
+			out.println("Accept-Language: zh-CN");
+			out.println("Accept: */*");
+			out.println("Connection: closed");
+			
+			out.println();
+			out.println();
+
+
+			BufferedReader bufr=new BufferedReader(new InputStreamReader(s.getInputStream()));
+
+			String line=null;
+
+			while((line=bufr.readLine())!=null){
+				ta.append(line+"\r\n");
+			}
+
+			s.close();
+
+		}
+		public static void  main(String[] args)throws Exception{
+			new MyIEByGUI();
+		}
+
+}
+
+
+
+
+
+
+
+8.网络编程（URL-URLConnection）
+
+
+import java.net.*;
+ 
+class URLDemo{
+	public static void main(String[] args)throws MalformedURLException{
+
+		URL url=new URL("http://192.168.1.103:8080/myweb/demo.html");
+		//URL url=new URL("http://192.168.1.103:8080/myweb/demo.html?name=lee&age=26");
+
+		System.out.println("url.getProtocol() :"+url.getProtocol());
+		System.out.println("url.getHost() :"+url.getHost());
+		System.out.println("url.getPort() :"+url.getPort());
+		System.out.println("url.getPath() :"+url.getPath());
+		System.out.println("url.getFile() :"+url.getFile());
+		System.out.println("url.getQuery() :"+url.getQuery());
+		
+		
+		/*
+		int port=getPort();
+		if(port==-1){
+			port=80;
+		}
+		*/
+	}
+}
+
+
+/*
+url.getProtocol() :http
+url.getHost() :192.168.1.103
+url.getPort() :8080
+url.getPath() :/myweb/demo.html
+url.getFile() :/myweb/demo.html
+url.getQuery() :null
+
+
+url.getProtocol() :http
+url.getHost() :192.168.1.103
+url.getPort() :8080
+url.getPath() :/myweb/demo.html
+url.getFile() :/myweb/demo.html?name=lee&age=26
+url.getQuery() :name=lee&age=26
+*/ 
+
+
+
+
+
+
+
+
+import java.net.*;
+import java.io.*;
+ 
+class URLConnectionDemo{
+	public static void main(String[] args)throws Exception{
+
+		URL url=new URL("http://192.168.1.103:8080/myweb/demo.html");
+
+		URLConnection conn=url.openConnection();
+		System.out.println(conn);
+
+		InputStream in=conn.getInputStream();
+
+		byte[] buf=new byte[1024];
+
+		int len=in.read(buf);
+
+		System.out.println(new String(buf,0,len));
+
+	}
+}
+
+
+/*
+result:
+sun.net.www.protocol.http.HttpURLConnection:http://192.168.1.103:8080/myweb/demo.html
+<html>
+        <body>
+                <h1>这是我的主页</h1>
+                <font size=5 color=red>欢迎光临</font>
+                <div>
+                  塔城撒发生顶戴阿斯蒂芬阿斯蒂斯蒂芬</br>
+                  塔城撒发生顶戴阿斯蒂芬阿斯蒂斯蒂芬</br>
+                  塔城撒发生顶戴阿斯蒂芬阿斯蒂斯蒂芬</br>
+                </div>
+        </body>
+</html>
+
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+由于上面对url地址有字符上截取，现在直接有URL对象进行处理
+
+*/
+
+
+import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
+import java.net.*;
+
+class MyIEByGUI2{
+	private Frame f;
+	private TextField tf;
+	private Button but;
+	private TextArea ta;
+
+	private Dialog d;
+	private Label lab;
+	private Button okBut;
+
+	MyIEByGUI2(){
+		init();
+	}
+
+	public void init(){
+		f=new Frame("my window");
+		f.setBounds(300,100,600,500);
+		f.setLayout(new FlowLayout());
+
+		tf=new TextField(50);
+
+		but=new Button("Go");
+
+		ta=new TextArea(25,55);
+
+
+
+		d=new Dialog(f,"tipmessage-self",true);
+		d.setBounds(400,200,240,150);
+		d.setLayout(new FlowLayout());
+		lab=new Label();
+		okBut=new Button("ok");
+
+		d.add(lab);
+		d.add(okBut);
+
+
+
+
+
+
+		f.add(tf);
+		f.add(but);
+		f.add(ta);
+
+		myEvent();
+
+		f.setVisible(true);
+
+}
+		private void myEvent(){
+
+			okBut.addActionListener(new ActionListener(){
+				public void actionPerformed(ActionEvent e){
+					d.setVisible(false);
+				}
+			});
+
+
+			d.addWindowListener(new WindowAdapter(){
+			public void windowClosing(WindowEvent e){
+				d.setVisible(false );
+			}
+		});
+
+			tf.addKeyListener(new KeyAdapter(){
+				public void keyPressed(KeyEvent e){
+					if(e.getKeyCode()==KeyEvent.VK_ENTER){
+						try{
+							showDir();
+						}catch(Exception ex){
+
+						}
+						
+					}
+				}
+			});
+
+
+
+			but.addActionListener(new ActionListener(){
+				public void actionPerformed(ActionEvent e){
+					try{
+							showDir();
+						}catch(Exception ex){
+
+						}
+					
+				}
+			});
+		
+
+
+		f.addWindowListener(new WindowAdapter(){
+			public void windowClosing(WindowEvent e){
+				System.exit(0);
+			}
+		});
+	}
+
+		private void showDir()throws Exception{
+
+			ta.setText("");
+			String urlPath=tf.getText();//http://192.168.1.103:8080/myweb/demo.html
+
+			URL url=new URL(urlPath);
+
+			URLConnection conn=url.openConnection();
+
+			InputStream in=conn.getInputStream();
+
+			byte[] buf=new byte[1024];
+
+			int len=in.read(buf);
+
+			ta.setText(new String(buf,0,len));
+
+		}
+		public static void  main(String[] args)throws Exception{
+			new MyIEByGUI2();
+		}
+
+}
+
+

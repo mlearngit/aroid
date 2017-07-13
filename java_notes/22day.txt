@@ -1,0 +1,808 @@
+1.GUI(概述)
+
+GUI
+	GUI:Graphical User Interface(图形用户接口)
+	用图形的方式，来显示计算机操作的界面，这样更方便更直观。
+
+CLI
+	Command line User Interface(命令行用户接口)
+	就是常见的Dos命令行操作。
+	需要记忆一些常用的命令，操作不直观。
+	
+举例：
+	比如：创建文件夹，或者删除文件夹等。
+JAVA为GUI提供的对象都存在java.Awt和javax.Swing两个包中。
+
+
+Awt和Swing
+
+	java.Awt：Abstract Window ToolKit(抽象窗口工具包)，需要调用本地系统方法实现功能 .
+	属重量级控制。
+	
+	java.Swing：在AWT的基础上，建立一套图形界面系统，其中提供了更多的组件，而且完全
+	由JAVA实现。增强了移植性，属于轻量级控件。
+	
+	
+	
+	
+2.GUI布局
+
+常见布局管理器
+	FlowLayout (流式布局管理器)
+		从左到右的顺序排列。
+		Panel默认的布局管理器。
+	BorderLayout(边界布局管理器)
+		东、南、西、北、中
+		Frame默认的布局管理器
+	GridLayout（网格布局管理器）
+		规则的矩阵
+	CardLayout（卡片布局管理器）
+		选项卡
+	GridBagLayout（网格包布局管理器）
+		非规则的矩阵
+
+		
+		
+		
+		
+		
+		
+3.GUI(Frame)
+
+创建图形化界面：
+1.创建Frame窗体
+2.对窗体进行基本设置。
+	比如大小、位置、布局。
+3.定义组件。
+4.将组件通过窗体的add方法添加到窗体中。
+5.让窗体显示，通过setVisible(true);
+
+import java.awt.*;
+class AwtDemo{
+	public static void main(String[] args){
+		Frame f=new Frame("my awt");
+		f.setSize(500,500);
+		f.setLocation(100,500);
+		f.setLayout(new FlowLayout());
+
+		Button b=new Button("Im a Button");
+		
+
+		f.add(b);
+		
+		f.setVisible(true);
+		System.out.println("Hello World");
+	}
+}
+
+
+
+
+
+
+
+4.GUI(事件监听机制)
+
+事件监听机制的特点：
+1.事件源
+2.事件。
+3.监听器
+4.事件处理。
+
+事件源：就是awt包或者swing包中的那些图形界面组件
+
+事件：每一个事件源都有自己特有的对应事件和共性事件。
+
+监听器：将可以触发某一个事件的动作（不只一个动作）都已经封装到了监听器中。
+
+以上三者，在java中都已经定义好了。
+直接获取其对象来用就可以了。
+
+我们要做的事情是，就是对产生的动作进行处理。
+
+
+
+
+
+
+
+5.GUI(窗体事件)
+
+
+
+import java.awt.*;
+import java.awt.event.*;
+
+class AwtDemo{
+	public static void main(String[] args){
+		Frame f=new Frame("my awt");
+		f.setSize(500,500);
+		f.setLocation(100,500);
+		f.setLayout(new FlowLayout());
+
+		Button b=new Button("Im a Button");
+		
+		f.add(b);
+
+		f.addWindowListener(new WindowAdapter(){
+			public void windowClosing(WindowEvent e){
+				System.out.println("window closing");
+				System.exit(0);	
+			}
+			
+			//该方法是窗体前置显示（显示在其它窗口的最前端）时被调用
+			public void windowActivated(WindowEvent e){
+				System.out.println("wo huo le");
+			}
+
+			//当窗体被打开时（只要打开时才创建）
+			public void windowOpened(WindowEvent e){
+				System.out.println("be opended,hahah");
+			}
+		});
+		
+		f.setVisible(true);
+		
+	}
+}
+
+/*
+class Mywin  implements WindowListener{
+	//覆盖7个方法，可是我只用到了关闭的动作。
+	//其它动作都没有用到，可是却必须复写。
+}
+*/
+
+
+
+
+//因为windowListener的子类windowAdapter已经实现了windowListener接口。
+//并覆盖了其中的所有方法。那么我只要继承至windowAdapter覆盖我需要的方法即可。
+class Mywin extends WindowAdapter{
+	public void windowClosing(WindowEvent e){
+		System.out.println("window closing--"+e.toString());
+	}
+}
+
+
+
+
+
+
+
+
+
+
+6.GUI（Action事件）
+
+
+import java.awt.*;
+import java.awt.event.*;
+
+
+class FrameDemo{
+
+	//定义该图形中所需的组件的引用。
+	private Frame f;
+	private Button but;
+
+	FrameDemo(){
+		init();
+	}
+
+	public  void init(){
+		f=new Frame("my frame");
+
+		//对frame进行基本设置
+		f.setBounds(300,100,600,500);//该方法包括setSize()和setLocation()
+		f.setLayout(new FlowLayout());
+
+		but=new Button("my botton");
+
+		//将组件添加到frame中
+		f.add(but);
+
+		//加载一下窗体上事件。
+		myEvent();
+
+		f.setVisible(true);
+	}
+
+
+	private void myEvent(){
+		f.addWindowListener(new WindowAdapter(){
+			public void windowClosing(WindowEvent e){
+				System.exit(0);
+			}
+		});
+
+		
+		//让按钮具备退出程序的功能。
+		
+		//按钮就是事件源。
+		//那么选择哪个监听器呢？
+		//通过关闭窗体示例了解到，想要知道哪个组件具备什么样的特有监听器
+		//需要查看该组件对象的功能。
+		//通过查阅button的描述。发现按钮支持一个特有监听addActionListener.
+		//另外说明：这个Button的监听器接口中只有一个方法，因此就没有adapter的子类
+		（一般监听器接口没有子类（Adapter）的只有三个）
+		而有些有adaper之类的监听器都会有多个方法，这样我们在实例化的时候只要找到其adapter
+		类就不用复写它所有的方法
+
+		but.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				System.out.println("tui chu....");
+				System.exit(0);
+			}
+		});
+	}
+
+
+	public static void main(String[] args){
+		new FrameDemo();
+	}
+}
+
+
+
+
+
+7.GUI（鼠标）
+
+
+import java.awt.*;
+import java.awt.event.*;
+
+
+class MouseAndKeyEvent{
+	private Frame f;
+	private Button but;
+
+	MouseAndKeyEvent(){
+		init();
+	}
+
+	public  void init(){
+		f=new Frame("my frame");
+
+		f.setBounds(300,100,600,500);
+		f.setLayout(new FlowLayout());
+
+		but=new Button("my botton");
+
+		f.add(but);
+
+		myEvent();
+
+		f.setVisible(true);
+	}
+
+
+	private void myEvent(){
+		f.addWindowListener(new WindowAdapter(){
+			public void windowClosing(WindowEvent e){
+				System.exit(0);
+			}
+		});
+
+
+		
+		/*
+			给鼠标加监听
+		*/
+		but.addMouseListener(new MouseAdapter(){
+			private int count=1;
+			private int clickCount=1;
+			public void mouseEntered(MouseEvent e){
+				System.out.println("mouse enter..."+count++);
+			}
+
+			
+			//虽然click和下面的action方法都是对button进行操作，但click相对于更具体一些
+			public void mouseClicked(MouseEvent e){
+				//System.out.println("mouse click..."+clickCount++);
+				if(e.getClickCount()==2){  //双击
+					System.out.println("double action"+clickCount++);
+				}
+			}
+		});
+
+
+		but.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				System.out.println("action ok....");
+			}
+		});
+
+	}
+
+
+	public static void main(String[] args){
+		new MouseAndKeyEvent();
+	}
+}
+
+
+
+
+
+
+
+8.GUI（键盘事件）
+
+import java.awt.*;
+import java.awt.event.*;
+
+
+class MouseAndKeyEvent{
+	private Frame f;
+	private Button but;
+	private TextField tf; //文本框
+	MouseAndKeyEvent(){
+		init();
+	}
+
+	public  void init(){
+		f=new Frame("my frame");
+
+		f.setBounds(300,100,600,500);
+		f.setLayout(new FlowLayout());
+
+
+
+		tf=new TextField(20);
+		but=new Button("my botton");
+
+		f.add(tf);
+		f.add(but);
+	
+
+		myEvent();
+
+		f.setVisible(true);
+	}
+
+
+	private void myEvent(){
+		f.addWindowListener(new WindowAdapter(){
+			public void windowClosing(WindowEvent e){
+				System.exit(0);
+			}
+		});
+
+
+		tf.addKeyListener(new KeyAdapter(){
+			public void keyPressed(KeyEvent e){
+				int code=e.getKeyCode();
+				if(!(code>=KeyEvent.VK_0 && code<=KeyEvent.VK_9)){
+					System.out.println(code+"......is fei fa  de");
+					e.consume();
+				}
+			}
+		});
+
+
+		
+		//给but添加一个键盘监听
+		but.addKeyListener(new KeyAdapter(){
+			public void keyPressed(KeyEvent e){
+				//System.out.println(e.getKeyChar()+"...."+e.getKeyCode());
+			    //System.out.println(KeyEvent.getKeyText(e.getKeyCode())+"...."+e.getKeyCode());
+				if(e.isControlDown() && e.getKeyCode()==KeyEvent.VK_ENTER){
+					System.out.println("ctrl+enter is run");
+				}
+			}
+		});
+
+/*
+		but.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				System.out.println("action ok....");
+			}
+		});
+*/
+	}
+
+
+	public static void main(String[] args){
+		new MouseAndKeyEvent();
+	}
+}
+
+
+
+
+9.GUI（练习-列出指定目录内容）
+
+import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
+
+class MyWindowDemo{
+	private Frame f;
+	private TextField tf;
+	private Button but;
+	private TextArea ta;
+
+	MyWindowDemo(){
+		init();
+	}
+
+	public void init(){
+		f=new Frame("my window");
+		f.setBounds(300,100,600,500);
+		f.setLayout(new FlowLayout());
+
+		tf=new TextField(50);
+
+		but=new Button("Go");
+
+		ta=new TextArea(25,55);
+
+		f.add(tf);
+		f.add(but);
+		f.add(ta);
+
+		myEvent();
+
+		f.setVisible(true);
+
+}
+		private void myEvent(){
+			but.addActionListener(new ActionListener(){
+				public void actionPerformed(ActionEvent e){
+					
+					String dirPath=tf.getText();
+
+					File dir=new File(dirPath);
+
+					if(dir.exists()  && dir.isDirectory()){
+						ta.setText("");
+						String[] names=dir.list();
+						for(String name : names){
+							ta.append(name+"\r\n");
+						}
+					}
+				}
+			});
+		
+
+
+		f.addWindowListener(new WindowAdapter(){
+			public void windowClosing(WindowEvent e){
+				System.exit(0);
+			}
+		});
+	}
+
+		public static void  main(String[] args){
+			new MyWindowDemo();
+		}
+
+}
+
+
+
+
+
+
+
+
+
+
+10.GUI（对话框Dialog）
+
+
+
+
+import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
+
+class MyWindowDemo{
+	private Frame f;
+	private TextField tf;
+	private Button but;
+	private TextArea ta;
+
+	private Dialog d;
+	private Label lab;
+	private Button okBut;
+
+	MyWindowDemo(){
+		init();
+	}
+
+	public void init(){
+		f=new Frame("my window");
+		f.setBounds(300,100,600,500);
+		f.setLayout(new FlowLayout());
+
+		tf=new TextField(50);
+
+		but=new Button("Go");
+
+		ta=new TextArea(25,55);
+
+
+
+		d=new Dialog(f,"tipmessage-self",true);
+		d.setBounds(400,200,240,150);
+		d.setLayout(new FlowLayout());
+		lab=new Label();
+		okBut=new Button("ok");
+
+		d.add(lab);
+		d.add(okBut);
+
+
+
+		f.add(tf);
+		f.add(but);
+		f.add(ta);
+
+		myEvent();
+
+		f.setVisible(true);
+
+}
+		private void myEvent(){
+
+			okBut.addActionListener(new ActionListener(){
+				public void actionPerformed(ActionEvent e){
+					d.setVisible(false);
+				}
+			});
+
+
+			d.addWindowListener(new WindowAdapter(){
+			public void windowClosing(WindowEvent e){
+				d.setVisible(false );
+			}
+		});
+
+			tf.addKeyListener(new KeyAdapter(){
+				public void keyPressed(KeyEvent e){
+					if(e.getKeyCode()==KeyEvent.VK_ENTER){
+						showDir();
+					}
+				}
+			});
+
+
+			but.addActionListener(new ActionListener(){
+				public void actionPerformed(ActionEvent e){
+					showDir();
+					
+				}
+			});
+		
+
+		f.addWindowListener(new WindowAdapter(){
+			public void windowClosing(WindowEvent e){
+				System.exit(0);
+			}
+		});
+	}
+
+		private void showDir(){
+
+			String dirPath=tf.getText();
+
+			File dir=new File(dirPath);
+
+			if(dir.exists()  && dir.isDirectory()){
+				ta.setText("");
+				String[] names=dir.list();
+				for(String name : names){
+					ta.append(name+"\r\n");
+				}
+			}else{
+				String info="you enter message:"+dirPath+"is error,please again";
+				lab.setText(info);
+				d.setVisible(true);
+			}
+		}
+		public static void  main(String[] args){
+			new MyWindowDemo();
+		}
+
+}
+
+
+
+
+
+
+
+
+
+11.GUI(菜单)
+
+
+import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
+
+class MyMenuDemo{
+	private Frame f;
+	private MenuBar mb;
+	private Menu m,subMenu;
+	private MenuItem closeItem,subItem;
+
+	MyMenuDemo(){
+		init();
+	}
+
+	public void init(){
+		f=new Frame("my window");
+		f.setBounds(300,100,500,600);
+		f.setLayout(new FlowLayout());
+
+		mb=new MenuBar();
+
+		m=new Menu("File");
+
+		subMenu=new Menu("subMenu");
+
+
+
+		//subItem=new Menu("subItem");
+		//closeItem=new Menu("exit");
+        subItem=new MenuItem("subItem");
+		closeItem=new MenuItem("exit");
+		
+
+		subMenu.add(subItem);
+
+		m.add(subMenu);
+		m.add(closeItem);
+		mb.add(m);
+
+		f.setMenuBar(mb);
+
+		myEvent();
+
+		f.setVisible(true);
+	}
+
+	private void myEvent(){
+
+		f.addWindowListener(new WindowAdapter(){
+			public void windowClosing(WindowEvent e){
+				System.exit(0);
+			}
+		});
+
+
+		closeItem.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				System.exit(0);
+			}
+		});
+
+		}
+
+
+	public static void main(String[] args){
+		new MyMenuDemo();
+	}
+}
+
+
+
+
+
+
+12.GUI（练习-打开文件）
+
+import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
+
+class MyMenuDemo{
+	private Frame f;
+	private MenuBar bar;
+	private TextArea ta;
+	private Menu fileMenu;
+	private MenuItem openItem,saveItem,closeItem;
+
+	private FileDialog openDia,saveDia;
+
+	MyMenuDemo(){
+		init();
+	}
+
+	public void init(){
+		f=new Frame("my window");
+		f.setBounds(300,100,650,600);
+		//f.setLayout(new BorderLayout());
+
+		bar=new MenuBar();
+
+		ta=new TextArea();
+
+		fileMenu=new Menu("File");
+
+
+		openItem=new MenuItem("open");
+		saveItem=new MenuItem("save");
+		closeItem=new MenuItem("exit");
+
+
+		fileMenu.add(openItem);
+		fileMenu.add(saveItem);
+		fileMenu.add(closeItem);
+		bar.add(fileMenu);
+
+		f.setMenuBar(bar);
+
+
+		openDia=new FileDialog(f,"open",FileDialog.LOAD);
+		saveDia=new FileDialog(f,"save",FileDialog.SAVE);
+
+		f.add(ta);
+		myEvent();
+
+		f.setVisible(true);
+	}
+
+	private void myEvent(){
+
+
+		openItem.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				openDia.setVisible(true);
+
+				String dirPath=openDia.getDirectory();
+				String fileName=openDia.getFile();
+				System.out.println(dirPath+"....."+fileName);
+				if(dirPath==null || fileName==null){
+					return ;
+				}
+				ta.setText("");
+
+				File file=new File(dirPath,fileName);
+
+				try{
+					BufferedReader bufr=new BufferedReader(new FileReader(file));
+
+					String line=null;
+
+					while((line=bufr.readLine())!=null){
+						ta.append(line+"\r\n");
+					}
+
+					bufr.close();
+				}catch(IOException ex){
+					throw new RuntimeException("read fai l");
+
+				}
+			}
+		});
+
+
+		f.addWindowListener(new WindowAdapter(){
+			public void windowClosing(WindowEvent e){
+				System.exit(0);
+			}
+		});
+
+
+		closeItem.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				System.exit(0);
+			}
+		});
+
+		}
+
+
+	public static void main(String[] args){
+		new MyMenuDemo();
+	}
+}
+
+
+
+12.GUI（保存文件）

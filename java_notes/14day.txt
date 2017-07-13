@@ -1,0 +1,881 @@
+1.集合框架(体系概述)
+
+为什么出现集合类？
+	面向对象语言对事物的体现都是以对象的形式，所以为了方便对多个对象的操作，
+	就对对象进行存储，集合就是存储对象最常用的一种方式。
+
+数组和集合类同是容器，是何不同？
+	数组虽然也可以存储对象，但长度是固定的；集合长度是可变的。
+	数组中可以存储基本数据类型，集合只能存储对象。
+	
+集合类的特点:
+	集合只用于存储对象，集合长度是可变的，集合可以存储不同类型的对象。
+	
+集合框架
+	为什么会出现这么多的容器呢？
+		因为每一个容器对数据的存储方式都有不同。
+		这个存储方式称之为：数据结构
+		
+
+2.集合框架（共性方法）
+
+1.add方法的参数类型是Object。以便于接收任意类型对象。
+2.集合中存储的都是对象的引用（地址）
+
+import java.util.*;
+
+class CollectionDemo{
+	public static void main(String[] args){
+		
+	}
+	
+	public static void basic_method(){
+	//创建一个集合容器，使用Collection接口的子类，ArrayList
+		ArrayList al=new ArrayList();
+		
+		//1.添加元素。
+		a1.add("java01");//add(Object obj);
+		a1.add("java02")
+		a1.add("java03")
+		a1.add("java04")
+		
+		//打印原集合。
+		sop("原集合:"+al);
+		
+		//3.删除元素。
+		//al.clear();//清空集合。
+		
+		//4.判断元素。
+		sop("java03是否存在:+al.contains("java03"));
+		sop("集合是否为空?"+al.isEmpty());
+		
+		
+		//2.获取个数，集合长度。
+		sop("size:"+al.size());
+		
+		//打印改变后的集合
+		sop(al)
+	}
+	
+	
+	public static void method_2(){
+		ArrayList al1=new ArrayList();
+		
+		a11.add("java01");
+		a11.add("java02");
+		a11.add("java03");
+		a11.add("java04");
+		
+		ArrayList al2=new ArrayList();
+		
+		a12.add("java01");
+		a12.add("java02");
+		a12.add("java03");
+		a12.add("java04");
+		
+		
+		//al1.retainAll(al2);//去交集，al1中只会保留和al2中相同的元素。
+		sop("al1:"+al1);
+		sop("al2:"+al2);
+	}
+	
+	public static void method_get(){
+		ArrayList al=new ArrayList();
+		
+		//1.添加元素。
+		a1.add("java01");//add(Object obj);
+		a1.add("java02");
+		a1.add("java03");
+		a1.add("java04");
+		
+		Iterator it=al.iterator();//获取迭代器，用于取出集合中的元素。
+		while(it.hasNext()){
+			sop(it.next()); 
+		}
+		
+		for(Iterator it=al.iterator();it.hasNext();){
+			sop(it.next());
+		}
+	}
+}
+
+
+3.集合框架（迭代器）
+
+什么是迭代器呢？
+其实就是集合的取出元素的方式。
+
+
+迭代器的理解：
+就把取出方式定义在集合的内部，
+这样取出方式就可以直接访问集合内部的元素。
+那么取出方式就被定义成了内部类。
+而每一个容器的数据结构不同，
+所以取出的动作细节也不一样。但是都有共性内容
+判断和取出。那么可以将共性抽取。
+
+那么这些内部类都符合一个规则。该规则是Iterator
+如何获取集合的取出对象呢？
+通过一个对外提供的方法
+iterator();
+（理解：每个容器中的虽然数据结构不一样，但是都有判断和取出的方法
+将，这些方法抽取出来封装成类，这个类就是Iterator）
+
+这个迭代器可以理解为生活中的电玩中的爪子。
+
+代码：上部分方法中的method_get()
+
+
+
+
+
+
+4.集合框架（List集合共性方法）
+
+Collection
+	|--List:元素是有序的，元素可以重复。因为该集合体系有索引。
+	|--Set:元素是无序的，元素不可以重复。
+	
+List：
+	特有方法，凡是可以操作角标的方法都是该体系特有的方法。
+	
+增
+	add(index,element)；
+	addAll(index,Collection);
+	
+删
+	remove(index);
+	
+改
+	set(index,element);
+	
+查
+	get(index);
+	subList(from,to);
+	listIterator();
+	
+
+
+
+5.（代码中包含第4段中的）	
+List集合特有的迭代器。ListIterator是Iterator的子接口。
+
+在迭代时，不可以通过集合对象的方法操作集合中的元素。
+因为会发生ConcurrentModificationException异常。
+
+所以，在迭代时，只能用迭代器的来操作元素，可是Iterator方法是有限的。
+只能对元素进行判断、取出、删除的操作，
+如果想要其它的操作，如添加、修改等，就需要使用其子接口，ListIterator。
+
+该接口只能通过List集合的listIterator方法获取。	
+
+最后记住：ListIterator出现以后，可以在遍历过程中的增删改查
+
+	
+import java.util.*;
+
+class ListDemo{
+
+	public static void method(){
+	
+		ArrayList al=new ArrayList();
+		
+		//添加元素
+		al.add("java01");
+		al.add("java02");
+		al.add("java03");
+		
+		sop("yuan ji he:"+al);
+		//在指定位置添加元素。
+		al.add(1,"java09");
+		
+		//删除指定位置的元素。
+		//al.remove(2);
+		
+		//修改元素。
+		//al.set(2,"java007");
+		
+		//通过角标获取元素。
+		sop("get(1)"+al.get(1));
+		
+		sop(al);
+		
+		
+		//获取所有元素。
+		for(int x=0;x<al.size();x++){
+			System.out.println("al("+x+")="+al.get(x));
+		}
+		
+		Iterator it=al.iterator();
+		while(it.hasNext()){
+			sop("next:"+it.next());
+		}
+	
+	
+		//通过IndexOf获取对象的位置。
+		sop("index="+al.indexOf("java02"));
+		
+		List sub=al.subList(1,3);   //包含角标1，但不包括角标3之间的元素
+		sop("sub="+sub);
+	}
+	
+	
+	public static void main(String[] args){
+		
+		
+		ArrayList al=new ArrayList();
+		
+		
+		al.add("java01");
+		al.add("java02");
+		al.add("java03");
+		
+		sop(al);
+		
+		
+		
+		ListIterator li=al.listIterator();
+		
+		//sop("hasPreviout():"+li.hasPrevious());
+		
+		while(li.hasNext()){
+			Object obj=li.next();
+			
+			if(obj.equals("java02")){
+				//li.add("java009");
+				li.set("java006");
+			}
+		}
+		
+		while(li.hasPrevious()){
+			sop("pre: "+li.previous());
+		}
+		
+		//sop("hasNext():"+li.hasNext());
+		//sop("hasPrevious():"+li.hasPrevious());
+		
+		
+		sop(al);
+		
+		
+		
+	/*	
+		//在迭代过程中，准备添加或者删除元素。
+		Iterator it=al.iterator();
+		
+		while(it.hasNext()){
+		
+			Object obj=it.next();
+			
+			if(obj.equals("java02")){
+				//al.add("java008"); //执行此句会报异常ConcurrentModificationException，原因是在迭代的时候不能使用集合中的方法
+				it.remove(); 只是将java02的【引用】从集合中删除了，但元素还在内存中
+			}
+			
+			sop("obj="+obj);
+			
+		}
+		
+		sop(al);
+	*/
+	}
+	
+	
+	
+	
+	public static void sop(Object obj){
+		System.out.println(obj);
+	}
+	
+}
+
+
+
+
+
+
+
+
+6.List集合具体对象的特点：
+
+
+Collection
+	|--List:元素是有序的，元素可以重复。因为该集合体系有索引。
+	|--ArraydList：底层的数据结构使用的是数组结构。特点：查询速度快，但是增删稍慢，线程不同步。
+	|--LinkedList：底层使用的链表数据结构。特点：增删速度很快，查询稍慢。
+	|--Vector:底层是数组数据结构。线程同步。被ArrayList替代了。
+	
+	|--Set:元素是无序的，元素不可以重复。
+	
+	
+
+7.集合框架（Vector中的枚举）
+
+枚举就是Vector特有的取出方式 
+发现枚举和迭代器很像。
+其实枚举和迭代器是一样的。
+
+因为枚举的名称以及方法的名称都过长。
+所以被迭代器取代了。
+枚举郁郁而终了。
+
+import java.util.*;
+
+class VectorDemo{
+	public static void main(String[] args){
+		Vector v=new Vector();
+		
+		v.add("java01");
+		v.add("java02");
+		v.add("java03");
+		v.add("java04");
+		
+		Enumeration en=v.elements();
+		
+		while(en.hasMoreElements()){
+			System.out.println(en.nextElement());
+		}
+	}
+}
+
+
+
+
+
+
+8.集合框架（LinkedList）
+
+LinkedList特有方法：
+addFirst();
+addLast();
+
+getFirst();
+getLast();
+获取元素，但不删除元素。如果集合中没有元素，会出现NoSuchElementException
+
+removeFirst();
+removeLast();
+获取元素，但是元素被删除。如果集合中没有元素，会出现NoSuchElementException
+
+
+在JDK1.6出现了替代方法。(以后就使用下面的方法)
+
+offerFirst();
+offerLast();
+
+peekFirst();
+peekLast();
+获取元素，但不删除元素。如果集合中没有元素，会返回null
+
+
+pollFirst();
+pollLast();
+获取元素，但是元素被删除。如果集合中没有元素，会返回null
+
+
+
+import java.util.*;
+
+class LinkedListDemo{
+	public static void main(String[] args){
+		LinkedList link=new LinkedList();
+		
+		link.addLast("java01");
+		link.addLast("java02");
+		link.addLast("java03");
+		link.addLast("java04");
+		
+		sop(link);
+		sop(link.getFirst());
+		sop(link.getFirst());
+		
+		sop(link.getLast());
+		sop(link.removeFirst());
+		sop(link.removeFirst());
+		
+		sop("size="+link.size());
+		
+		while(!link.isEmpty()){
+			link.removeFirst();
+		}
+		
+		
+	}
+		public static void sop(Object obj){
+			System.out.println(obj);
+		}
+	}
+	
+	
+	
+	
+9.集合框架（LinkedList练习）
+
+使用LinkedList模拟一个堆栈或者队列数据结构。
+
+堆栈：先进后出 ，  如同一个杯子
+队列：先进先出 ，  First in First out   FIFO 如同一个水管。
+
+下方类DuiLie中把LinkedList封装了下
+
+import java.util.*;
+
+class DuiLie{
+
+	private LinkedList link;
+
+	DuiLie(){
+		link=new LinkedList();
+	}
+	
+	public void myAdd(Object obj){
+	
+		link.addFirst(obj);
+	}
+	
+	public Object myGet(){
+		return link.removeLast();
+	}
+	
+	public boolean isNull(){
+		return link.isEmpty();
+	}
+}
+
+class LinkedListTest{
+	public static void main(String[]args){
+		DuiLie dl=new DuiLie();
+		
+		dl.myAdd("java01");
+		dl.myAdd("java02");
+		dl.myAdd("java03");
+		dl.myAdd("java04");
+		
+		while(!dl.isNull()){
+			System.out.println(dl.myGet());
+		}
+	}
+}
+
+
+
+
+
+10.集合框架（ArrayList练习）
+
+练习：去除 ArrayList中的重复元素
+
+import java.util.*;
+
+class ArrayListTest{
+	public static void main(String[] args){
+		ArrayList al=new ArrayList();
+		
+		al.add("java01");
+		al.add("java02");
+		al.add("java01");
+		al.add("java02");
+		al.add("java01");
+		//al.add("java03");
+		
+		/*
+		
+		Iterator it=al.iterator();
+		while(it.hasNext()){
+			sop(it.next()+"...."+it.next()); //注意：在迭代时循环中next调用一次，就要hasNext判断一次。否则出现NoSuchElementException
+		}
+		*/
+
+		
+		sop(al);
+		
+		ArrayList newal=singeElement(al);
+		
+		sop(newal); 
+	}
+	
+	public static ArrayList singeElement(ArrayList al){
+	
+		//定义一个临时容器
+		ArrayList newal=new ArrayList();
+		
+		Iterator it=al.iterator();
+		while(it.hasNext()){
+			Object obj=it.next();
+			
+			if(!newal.contains(obj)){
+				newal.add(obj);
+			}
+		}
+		return newal;
+	}
+	
+	public static void sop(Object obj){
+		System.out.println(obj);
+	}
+}
+
+
+
+
+
+11.集合框架（ArrayList练习2）
+
+之前直接是存相同的字符串！
+
+现在将自定义对象作为元素存到ArrayList集合中，并去除重复元素。
+
+比如：存人对象，同姓名同年龄，视为同一个人，为重复元素。
+
+1.对人描述，将数据封装进人对象。
+2.定义容器，将人存入
+3.取出、删除的操作，
+
+List集合判断元素是否相同，依据是元素的equals方法。
+
+在contains 和 remove这两个方法的底层都调用了equals方法
+
+import java.util.*;
+
+class Person{
+	private String name;
+	private int age;
+	
+	public Person(String name,int age){
+		this.name=name;
+		this.age=age;
+	}
+	
+	public boolean equals(Object obj){
+		if(!(obj instanceof Person)){
+			return false;
+		}
+		
+		Person p=(Person)obj;
+		//System.out.println(this.name+"----"+p.name);
+		return this.name.equals(p.name) && (this.age==p.age);
+	}
+	
+	public String getName(){
+		return name;
+	}
+	
+	public int getAge(){
+		return age;
+	}
+}
+
+class ArrayListTest2{
+	public static void main(String[] args){
+		ArrayList al=new ArrayList();
+		
+		al.add(new Person("lisi01",21));
+		al.add(new Person("lisi02",22));
+		al.add(new Person("lisi03",23));
+		al.add(new Person("lisi02",22));
+		//al.add(new Person("lisi05",25));
+		//al.add(new Person("lisi05",25));
+		
+		
+		al=singeArray(al);
+		
+		//sop("remove--"+al.remove(new Person("lisi04",24)));
+		
+		Iterator it=al.iterator();
+		
+		while(it.hasNext()){
+			Object obj=it.next();
+			Person p=(Person)obj;
+			sop(p.getName()+"---"+p.getAge());
+		}
+	
+		
+	
+	}
+	
+	public static void sop(Object obj){
+		System.out.println(obj);
+	}
+	
+	public static ArrayList singeArray(ArrayList al){
+		ArrayList newal=new ArrayList();
+		
+		Iterator it=al.iterator();
+		
+		while(it.hasNext()){
+			
+			Object obj=it.next();
+			
+			if(!newal.contains(obj)){
+				newal.add(obj);
+			}
+		}
+		return newal;
+	}
+}
+
+
+
+
+
+
+12.集合框架（HashSet）
+
+|--Set: 元素是无序（存入和取出的顺序不一定一致），元素不可以重复。
+		|--HashSet 底层数据结构是哈希表。
+		|--TreeSet:
+Set集合的功能和Collection是一致的。
+
+
+当对象存入Set集合时，先判断在哈希表里面看这个对象的哈希值是否有一样的，如果有一样的哈希值，
+那就调用equals方法看它俩的对象(内容)是否一样
+若一样，则该对象不能存入；若不一样，则可以存入集合
+
+两个不同的对象，它们的哈希值可能会一样，但是它们的对象(内容)不一定一样
+如果两个对象的equals是一样的，则他们的哈希值一定一样
+
+
+在Set集合内部存储的元素不是按照存入时的顺序存的，而是按照其哈希值的顺序存的
+如果存入的哈希值一样的话，它内部会再作一个验证，就是判断这两的对象是否一致。
+
+在比较的时候可以只复写equals方法，而不复写hashCode方法吗？
+答：当不复写hashCode方法时，在向Set集合中添加对象时会调用Object默认的hashCode方法返回哈希值
+可是，当用Ojbect默认的hashCode方法返回的哈希值永远是不一样的，这样就不会去调用复写的equals方法，
+因此就无法对自定义对象进行比较（对象去重）
+
+
+import java.util.*;
+
+class HashSetDemo{
+	public static void main(String[] args){
+		HashSet hs=new HashSet();
+		
+		sop(hs.add("java01")); //add返回值是布尔值
+		sop(hs.add("java01")); //判断内容一样返回false
+		hs.add("java02");
+		hs.add("java03");
+		hs.add("java04");
+		
+		Iterator it=hs.iterator();
+		while(it.hasNext()){
+			sop(it.next());
+		}
+	}
+	
+	public static void sop(Object obj){
+		System.out.println(obj);
+	}
+}
+
+
+运行结果：
+E:\learnjava>java  HashSetDemo
+true
+false
+java04
+java02
+java03
+java01
+
+
+
+
+
+
+
+13.集合框架（HashSet存储自定义对象）
+
+|--Set: 元素是无序（存入和取出的顺序不一定一致），元素不可以重复。
+		|--HashSet 底层数据结构是哈希表。
+		   HashSet是如何保证元素唯一性的呢？
+		   是通过元素的两个方法，hashCode和equals来完成。
+		   如果元素的HashCode值相同，才会判断equals是否为true.
+		   如果元素的HashCode值不同，不会调用equals.
+		|--TreeSet:
+		
+		
+import java.util.*;
+
+class Person{
+
+	private String name;
+	private int age;
+
+	public Person(String name,int age){
+		this.name=name;
+		this.age=age;
+	}
+
+	public int hashCode(){
+		System.out.println(this.name+"........hashcode");
+		return this.name.hashCode()+this.age*37;
+		//return 60;   //如果返回一样哈希值，就会每次去调用equals，会造成不必要的判断；
+	}
+
+	public boolean equals(Object obj){
+		if(!(obj instanceof Person)){
+			return false;
+		}
+		
+		Person p=(Person)obj;
+		System.out.println(this.name+".......equals......"+p.name);
+		return this.name.equals(p.name) && this.age==p.age;
+	}
+
+	public String getName(){
+		return name;
+	}
+
+	public int getAge(){
+		return age;
+	}
+}
+
+
+class HashSetTest{
+	public static void main(String[] args) {
+		HashSet  hs=new HashSet();
+
+		hs.add(new Person("a1",11));
+		hs.add(new Person("a2",12));
+		hs.add(new Person("a3",13));
+		hs.add(new Person("a2",12));
+
+		Iterator it=hs.iterator();
+
+		while(it.hasNext()){
+			Person p=(Person)it.next();
+
+			sop(p.getName()+"...."+p.getAge());
+		}
+	}
+
+	public static void sop(Object obj){
+		System.out.println(obj);
+	}
+}
+
+
+以上运行结果：
+a1........hashcode
+a2........hashcode
+a3........hashcode
+a2........hashcode
+a2.......equals......a2
+a1....11
+a3....13
+a2....12
+
+
+如果把hashcode返回值改成固定值的，那么运行结果为：
+a1........hashcode
+a2........hashcode
+a2.......equals......a1
+a3........hashcode
+a3.......equals......a2
+a3.......equals......a1
+a2........hashcode
+a2.......equals......a3
+a2.......equals......a2
+a3....13
+a2....12
+a1....11
+
+
+
+
+
+14.集合框架(HashSet判断和删除的依据)
+
+以下代码跟上一节基本一样，只是增加了两种情况的逻辑：contains和remove
+
+注意：对于判断元素是否存在，以及删除等操作，依赖的方法是元素的hashcode和equals方法。
+
+import java.util.*;
+
+class Person{
+
+	private String name;
+	private int age;
+
+	public Person(String name,int age){
+		this.name=name;
+		this.age=age;
+	}
+
+	public int hashCode(){
+		System.out.println(this.name+"........hashcode");
+		return this.name.hashCode()+this.age*37;
+		//return 60;
+	}
+
+	public boolean equals(Object obj){
+		if(!(obj instanceof Person)){
+			return false;
+		}
+		
+		Person p=(Person)obj;
+		System.out.println(this.name+".......equals......"+p.name);
+		return this.name.equals(p.name) && this.age==p.age;
+	}
+
+	public String getName(){
+		return name;
+	}
+
+	public int getAge(){
+		return age;
+	}
+}
+
+
+class HashSetTest{
+	public static void main(String[] args) {
+		HashSet  hs=new HashSet();
+
+		hs.add(new Person("a1",11));
+		hs.add(new Person("a2",12));
+		hs.add(new Person("a3",13));
+		
+
+		sop(hs.contains(new Person("a1",11)));
+		//sop(hs.remove(new Person("a3",13)));
+
+		Iterator it=hs.iterator();
+
+		while(it.hasNext()){
+			Person p=(Person)it.next();
+
+			sop(p.getName()+"...."+p.getAge());
+		}
+	}
+
+	public static void sop(Object obj){
+		System.out.println(obj);
+	}
+}
+
+
+
+
+contains 的结果：
+a1........hashcode
+a2........hashcode
+a3........hashcode
+a1........hashcode
+a1.......equals......a1
+true
+a1....11
+a3....13
+a2....12
+
+
+remove的结果：
+a1........hashcode
+a2........hashcode
+a3........hashcode
+a3........hashcode
+a3.......equals......a3
+true
+a1....11
+a2....12
