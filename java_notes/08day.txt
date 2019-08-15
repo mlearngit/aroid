@@ -197,7 +197,7 @@ class Demo{
 		this.num=num;
 	}
 	
-	public boolean equals(Object obj){   //Object obj=new Demo();
+	public boolean equals(Object obj){   //Object obj=new Demo(); 
 		Demo d=(Demo)obj;
 		return this.num==d.num;	
 		//this.num=obj.num;

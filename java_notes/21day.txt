@@ -355,7 +355,7 @@ class DataStreamDemo{
 
 ByteArrayInputStream:在构造的时候，需要接收数据源。而且数据源是一个字节数组。
 
-ByteArrayOutputStream:在构造的时候，不用定义数据目的，国为该对象中已经内部封装了要变长度
+ByteArrayOutputStream:在构造的时候，不用定义数据目的，因为该对象中已经内部封装了要变长度
 的字节数组。这就是数据目的地。
 
 因为这两个流对象都操作的数组，并没有使用系统资源。

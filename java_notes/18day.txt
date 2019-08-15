@@ -392,7 +392,7 @@ class FileWriterDemo3{
 		//传递一个true参数，代表不覆盖已有的文件，并在已有文件的末尾处进行数据续写。
 		FileWriter fw=new FileWriter("Demo.txt",true);
 		//注意：在windows系统中换行是用两个字符为表示，即\r\n，而linux中是用\n表示
-		//如果在windows中也用\n，则用记事本打时不会有效果。
+		//如果在windows中也用\n，则用记事本打开时不会有效果。
 		fw.write("aaa\r\nkkkkkkkkkkkk");
 
 		fw.close();

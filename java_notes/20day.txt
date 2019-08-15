@@ -123,7 +123,7 @@ public static void method_2()throws IOException{
 	public static void method_4()throws IOException{
 		File f=new File("file.txt");
 
-		sop("path:"+f.getPath());//这个路径的返回值由对象里的内容绝对，内容是相对就返回相对路径
+		sop("path:"+f.getPath());//这个路径的返回值由对象里的内容决定，内容是相对就返回相对路径
 								//内容是绝对就返回绝对路径.
 		sop("abspath:"+f.getAbsolutePath());//返回绝对路径。
 		sop("parent:"+f.getParent());//该方法返回的是绝对路径中的父目录。如果获取的是相对路径，则返回null。
@@ -778,7 +778,7 @@ class SplitFile{
 
 		byte[] buf=new byte[1024*1024];
 
-		int len=0;
+		int len=0; 
 		int count=1;
 		while((len=fis.read(buf))!=-1){
 			fos=new FileOutputStream("g:\\splitfile\\"+(count++)+".part");
